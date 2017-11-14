@@ -35,11 +35,11 @@ bool ModuleSceneStage::Start()
 
 	Segment s = { 0.0f, 0.0f };
 	stageSegments.push_back(s);
-	s = { 0.005f, (float) zMap.size() };
+	s = { 0.005f, (float)zMap.size() };
 	stageSegments.push_back(s);
-	s = { 0.005f, (float) zMap.size() };
+	s = { 0.005f, (float)zMap.size() };
 	stageSegments.push_back(s);
-	s = { 0.0f, (float) zMap.size() };
+	s = { 0.0f, (float)zMap.size() };
 	stageSegments.push_back(s);
 
 	bottomSegment = stageSegments.at(currentSegment);
@@ -71,7 +71,6 @@ update_status ModuleSceneStage::Update()
 	int minY = SCREEN_HEIGHT * SCREEN_SIZE - roadHeightScreen;
 	int maxY = y;
 	float scaleFactor;
-	float roadShrink, rumbleShrink, totalShrink;
 	float z;
 
 	float dX = 0;
@@ -81,9 +80,6 @@ update_status ModuleSceneStage::Update()
 		z = zMap.at(i);
 		scaleFactor = (float)(y - minY) / (maxY - minY);
 		scaleFactor = (scaleFactor * 0.9f) + 0.05f;
-		roadShrink = roadWidth - (roadWidth * scaleFactor);
-		rumbleShrink = rumbleWidth - (rumbleWidth * scaleFactor);
-		totalShrink = roadShrink + rumbleShrink;
 
 		if (i < topSegment.yMapPosition) {
 			dX = bottomSegment.dX;
@@ -98,19 +94,19 @@ update_status ModuleSceneStage::Update()
 
 		if ((int)(worldPosition * 10) % 2 == 0)
 		{
-			App->renderer->DrawHorizontalLine(x - (roadWidth / 2) - (rumbleWidth / 2) - (terrainWidth / 2) + (totalShrink / 2), y, terrainWidth, 219, 209, 180, 255);
-			App->renderer->DrawHorizontalLine(x - (roadWidth / 2) - (rumbleWidth / 2) + (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 0, 0, 255);
+			App->renderer->DrawHorizontalLine(x - (roadWidth * scaleFactor / 2) - (rumbleWidth * scaleFactor / 2) - (terrainWidth / 2), y, terrainWidth, 219, 209, 180, 255);
+			App->renderer->DrawHorizontalLine(x - (roadWidth * scaleFactor / 2) - (rumbleWidth * scaleFactor / 2), y, rumbleWidth * scaleFactor, 255, 0, 0, 255);
 			App->renderer->DrawHorizontalLine(x, y, roadWidth * scaleFactor, 105, 105, 105, 255);
-			App->renderer->DrawHorizontalLine(x + (roadWidth / 2) + (rumbleWidth / 2) - (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 0, 0, 255);
-			App->renderer->DrawHorizontalLine(x + (roadWidth / 2) + (rumbleWidth / 2) + (terrainWidth / 2) - (totalShrink / 2), y, terrainWidth, 219, 209, 180, 255);
+			App->renderer->DrawHorizontalLine(x + (roadWidth  * scaleFactor / 2) + (rumbleWidth  * scaleFactor / 2), y, rumbleWidth * scaleFactor, 255, 0, 0, 255);
+			App->renderer->DrawHorizontalLine(x + (roadWidth * scaleFactor / 2) + rumbleWidth * scaleFactor + (terrainWidth / 2), y, terrainWidth, 219, 209, 180, 255);
 		}
 		else
 		{
-			App->renderer->DrawHorizontalLine(x - (roadWidth / 2) - (rumbleWidth / 2) - (terrainWidth / 2) + (totalShrink / 2), y, terrainWidth, 194, 178, 128, 255);
-			App->renderer->DrawHorizontalLine(x - (roadWidth / 2) - (rumbleWidth / 2) + (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 255, 255, 255);
+			App->renderer->DrawHorizontalLine(x - (roadWidth * scaleFactor / 2) - (rumbleWidth * scaleFactor / 2) - (terrainWidth / 2), y, terrainWidth, 194, 178, 128, 255);
+			App->renderer->DrawHorizontalLine(x - (roadWidth * scaleFactor / 2) - (rumbleWidth * scaleFactor / 2), y, rumbleWidth * scaleFactor, 255, 255, 255, 255);
 			App->renderer->DrawHorizontalLine(x, y, roadWidth * scaleFactor, 115, 115, 115, 255);
-			App->renderer->DrawHorizontalLine(x + (roadWidth / 2) + (rumbleWidth / 2) - (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 255, 255, 255);
-			App->renderer->DrawHorizontalLine(x + (roadWidth / 2) + (rumbleWidth / 2) + (terrainWidth / 2) - (totalShrink / 2), y, terrainWidth, 194, 178, 128, 255);
+			App->renderer->DrawHorizontalLine(x + (roadWidth * scaleFactor / 2) + (rumbleWidth  * scaleFactor / 2), y, rumbleWidth * scaleFactor, 255, 255, 255, 255);
+			App->renderer->DrawHorizontalLine(x + (roadWidth * scaleFactor / 2) + rumbleWidth * scaleFactor + (terrainWidth / 2), y, terrainWidth, 194, 178, 128, 255);
 		}
 		y--;
 	}
@@ -123,7 +119,7 @@ update_status ModuleSceneStage::Update()
 			currentSegment++;
 		}
 		else {
-			topSegment = { 0.0f, (float) zMap.size() };
+			topSegment = { 0.0f, (float)zMap.size() };
 		}
 	}
 

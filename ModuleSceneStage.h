@@ -38,7 +38,7 @@ public:
 	SDL_Texture* background = nullptr;
 	std::vector<float> zMap;
 	std::vector<Segment> stageSegments;
-	int currentSegment = 0;
+	unsigned int currentSegment = 0;
 	Segment topSegment;
 	Segment bottomSegment;
 };
