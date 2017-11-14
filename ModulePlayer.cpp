@@ -30,6 +30,8 @@ bool ModulePlayer::CleanUp()
 // Update: draw background
 update_status ModulePlayer::Update()
 {
+	bool moving = false;
+
 	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
 	}
@@ -40,12 +42,20 @@ update_status ModulePlayer::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
+		position += 0.01f;
+		speed = 0.005f;
+		moving = true;
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
 	{
-		position += 0.01f;
+		position += 0.025f;
+		speed = 0.01f;
+		moving = true;
 	}
+
+	if (moving == false)
+		speed = 0.0f;
 
 	return UPDATE_CONTINUE;
 }

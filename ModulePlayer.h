@@ -18,7 +18,8 @@ public:
 	bool CleanUp();
 
 public:
-	float position = 0;
+	float position = 0.0f;
+	float speed = 0.05f;
 };
 
 #endif
