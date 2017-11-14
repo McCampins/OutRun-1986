@@ -5,6 +5,8 @@
 #define roadHeightScreen 300
 
 #define roadWidth 500
+#define rumbleWidth 50
+#define terrainWidth 2000
 #define segmentLength 200
 #define FOV 60
 

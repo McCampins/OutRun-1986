@@ -119,20 +119,32 @@ update_status ModuleSceneStage::Update()
 	int minY = SCREEN_HEIGHT * SCREEN_SIZE - roadHeightScreen;
 	int maxY = y;
 	float scaleFactor;
-
+	float roadShrink, rumbleShrink, terrainShrink, totalShrink;
 	float z;
+
 	for (vector<float>::const_iterator it = zMap.begin(); it != zMap.cend(); ++it)
 	{
 		z = *it;
 		scaleFactor = (float) (y - minY) / (maxY - minY);
+		roadShrink = roadWidth - (roadWidth * scaleFactor);
+		rumbleShrink = rumbleWidth - (rumbleWidth * scaleFactor);
+		totalShrink = roadShrink + rumbleShrink;
 
 		if ((int) (z * 10) % 2 == 0)
 		{
-			App->renderer->DrawLine(SCREEN_WIDTH * SCREEN_SIZE / 2, y, (int) roadWidth * scaleFactor, 105, 105, 105, 255);
+			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) - (roadWidth / 2) - (rumbleWidth / 2) - (terrainWidth / 2) + (totalShrink / 2), y, terrainWidth, 219, 209, 180, 255);
+			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) - (roadWidth / 2) - (rumbleWidth / 2) + (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 0, 0, 255);
+			App->renderer->DrawHorizontalLine(SCREEN_WIDTH * SCREEN_SIZE / 2, y, roadWidth * scaleFactor, 105, 105, 105, 255);
+			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) + (roadWidth / 2) + (rumbleWidth / 2) - (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 0, 0, 255);
+			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) + (roadWidth / 2) + (rumbleWidth / 2) + (terrainWidth / 2) - (totalShrink / 2), y, terrainWidth, 219, 209, 180, 255);
 		}
 		else
 		{
-			App->renderer->DrawLine(SCREEN_WIDTH * SCREEN_SIZE / 2, y, (int) roadWidth * scaleFactor, 115, 115, 115, 255);
+			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) - (roadWidth / 2) - (rumbleWidth / 2) - (terrainWidth / 2) + (totalShrink / 2), y, terrainWidth, 194, 178, 128, 255);
+			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) - (roadWidth / 2) - (rumbleWidth / 2) + (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 255, 255, 255);
+			App->renderer->DrawHorizontalLine(SCREEN_WIDTH * SCREEN_SIZE / 2, y, roadWidth * scaleFactor, 115, 115, 115, 255);
+			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) + (roadWidth / 2) + (rumbleWidth / 2) - (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 255, 255, 255);
+			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) + (roadWidth / 2) + (rumbleWidth / 2) + (terrainWidth / 2) - (totalShrink / 2), y, terrainWidth, 194, 178, 128, 255);
 		}
 		y--;
 	}

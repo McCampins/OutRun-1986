@@ -162,14 +162,14 @@ bool ModuleRender::DrawQuad(int x1, int y1, int w1, int x2, int y2, int w2, Uint
 	return ret;
 }
 
-bool ModuleRender::DrawLine(int x, int y, int w, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+bool ModuleRender::DrawHorizontalLine(float x, int y, float w, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
 	bool ret = true;
 
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
-	if (SDL_RenderDrawLine(renderer, x - (w / 2), y, x + (w / 2), y) != 0)
+	if (SDL_RenderDrawLine(renderer, static_cast<int>(x - (w / 2)), y, static_cast<int>(x + (w / 2)), y) != 0)
 	{
 		LOG("Cannot draw quad to screen. SDL_RenderDrawLine error: %s", SDL_GetError());
 		ret = false;
