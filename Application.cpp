@@ -9,7 +9,7 @@
 #include "ModuleParticles.h"
 
 #include "ModuleSceneIntro.h"
-#include "ModuleSceneSpace.h"
+#include "ModuleSceneStage.h"
 #include "ModulePlayer.h"
 
 using namespace std;
@@ -25,8 +25,8 @@ Application::Application()
 	modules.push_back(audio = new ModuleAudio());
 
 	// Game Modules
-	modules.push_back(scene_intro = new ModuleSceneIntro(false));
-	modules.push_back(scene_space = new ModuleSceneSpace(false));
+	//modules.push_back(scene_intro = new ModuleSceneIntro(false));
+	modules.push_back(scene_stage = new ModuleSceneStage(false));
 	modules.push_back(player = new ModulePlayer(false));
 
 	// Modules to draw on top of game logic
@@ -46,7 +46,7 @@ bool Application::Init()
 	bool ret = true;
 
 	for(list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
-		ret = (*it)->Init(); // we init everything, even if not anabled
+		ret = (*it)->Init(); // we init everything, even if not enabled
 
 	for(list<Module*>::iterator it = modules.begin(); it != modules.end() && ret; ++it)
 	{
@@ -55,7 +55,7 @@ bool Application::Init()
 	}
 
 	// Start the first scene --
-	fade->FadeToBlack(scene_intro, nullptr, 3.0f);
+	fade->FadeToBlack(scene_stage, nullptr, 3.0f);
 
 	return ret;
 }
