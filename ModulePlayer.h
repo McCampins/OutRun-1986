@@ -18,6 +18,7 @@ public:
 	bool CleanUp();
 
 public:
+	float position = 0;
 };
 
 #endif

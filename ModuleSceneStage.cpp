@@ -119,7 +119,7 @@ update_status ModuleSceneStage::Update()
 	int minY = SCREEN_HEIGHT * SCREEN_SIZE - roadHeightScreen;
 	int maxY = y;
 	float scaleFactor;
-	float roadShrink, rumbleShrink, terrainShrink, totalShrink;
+	float roadShrink, rumbleShrink, totalShrink;
 	float z;
 
 	for (vector<float>::const_iterator it = zMap.begin(); it != zMap.cend(); ++it)
@@ -130,7 +130,7 @@ update_status ModuleSceneStage::Update()
 		rumbleShrink = rumbleWidth - (rumbleWidth * scaleFactor);
 		totalShrink = roadShrink + rumbleShrink;
 
-		if ((int) (z * 10) % 2 == 0)
+		if ((int) ((z + App->player->position) * 10) % 2 == 0)
 		{
 			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) - (roadWidth / 2) - (rumbleWidth / 2) - (terrainWidth / 2) + (totalShrink / 2), y, terrainWidth, 219, 209, 180, 255);
 			App->renderer->DrawHorizontalLine((SCREEN_WIDTH * SCREEN_SIZE / 2) - (roadWidth / 2) - (rumbleWidth / 2) + (totalShrink / 2), y, rumbleWidth * scaleFactor, 255, 0, 0, 255);
