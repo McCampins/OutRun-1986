@@ -4,9 +4,9 @@
 #define roadHeightWorld -200
 #define roadHeightScreen 300
 
-#define roadWidth 500
+#define roadWidth 1000
 #define rumbleWidth 50
-#define terrainWidth 1000
+#define terrainWidth 2000
 #define segmentLength 200
 
 #include <cmath>
@@ -16,10 +16,10 @@ struct SDL_Texture;
 
 struct Segment {
 	float dX;
-	float zMapPosition;
+	float yMapPosition;
 
 	Segment() {};
-	Segment(float dX, float zMap) : dX(dX), zMapPosition(zMap) {};
+	Segment(float dX, float yMap) : dX(dX), yMapPosition(yMap) {};
 };
 
 
@@ -37,6 +37,8 @@ public:
 public:
 	SDL_Texture* background = nullptr;
 	std::vector<float> zMap;
+	std::vector<Segment> stageSegments;
+	int currentSegment = 0;
 	Segment topSegment;
 	Segment bottomSegment;
 };

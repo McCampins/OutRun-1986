@@ -19,7 +19,7 @@ public:
 
 public:
 	float position = 0.0f;
-	float speed = 0.05f;
+	float speed = 0.0f;
 };
 
 #endif

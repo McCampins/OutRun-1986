@@ -33,8 +33,19 @@ bool ModuleSceneStage::Start()
 		zMap.push_back(z);
 	}
 
-	bottomSegment = { 0, 0 };
-	topSegment = { 0.075f, zMap.back() };
+	Segment s = { 0.0f, 0.0f };
+	stageSegments.push_back(s);
+	s = { 0.005f, (float) zMap.size() };
+	stageSegments.push_back(s);
+	s = { 0.005f, (float) zMap.size() };
+	stageSegments.push_back(s);
+	s = { 0.0f, (float) zMap.size() };
+	stageSegments.push_back(s);
+
+	bottomSegment = stageSegments.at(currentSegment);
+	currentSegment++;
+	topSegment = stageSegments.at(currentSegment);
+	currentSegment++;
 
 	return true;
 }
@@ -65,23 +76,22 @@ update_status ModuleSceneStage::Update()
 
 	float dX = 0;
 	float ddX = 0;
-	float curveFactor = 0.1f;
 
-	for (vector<float>::const_iterator it = zMap.begin(); it != zMap.cend(); ++it)
-	{
-		z = *it;
+	for (unsigned int i = 0; i < zMap.size(); i++) {
+		z = zMap.at(i);
 		scaleFactor = (float)(y - minY) / (maxY - minY);
+		scaleFactor = (scaleFactor * 0.9f) + 0.05f;
 		roadShrink = roadWidth - (roadWidth * scaleFactor);
 		rumbleShrink = rumbleWidth - (rumbleWidth * scaleFactor);
 		totalShrink = roadShrink + rumbleShrink;
 
-		if (z < topSegment.zMapPosition) {
+		if (i < topSegment.yMapPosition) {
 			dX = bottomSegment.dX;
 		}
 		else {
 			dX = topSegment.dX;
 		}
-		ddX += dX * curveFactor;
+		ddX += dX;
 		x += ddX;
 
 		float worldPosition = z + App->player->position;
@@ -105,11 +115,16 @@ update_status ModuleSceneStage::Update()
 		y--;
 	}
 
-	topSegment.zMapPosition -= App->player->speed;
-	if (topSegment.zMapPosition < 0) {
+	topSegment.yMapPosition -= App->player->speed;
+	if (topSegment.yMapPosition < 0) {
 		bottomSegment = topSegment;
-		topSegment.zMapPosition = zMap.back();
-		topSegment.dX = 0;
+		if (currentSegment < stageSegments.size() - 1) {
+			topSegment = stageSegments.at(currentSegment);
+			currentSegment++;
+		}
+		else {
+			topSegment = { 0.0f, (float) zMap.size() };
+		}
 	}
 
 	return UPDATE_CONTINUE;
