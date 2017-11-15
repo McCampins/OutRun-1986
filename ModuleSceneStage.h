@@ -2,12 +2,11 @@
 #define __MODULESCENESTAGE_H__
 
 #define roadHeightWorld -200
-#define roadHeightScreen 300
+#define roadHeightScreen 200
 
-#define roadWidth 1000
+#define roadWidth 1500
 #define rumbleWidth 50
 #define terrainWidth 2000
-#define segmentLength 200
 
 #include <cmath>
 #include "Module.h"
@@ -16,10 +15,11 @@ struct SDL_Texture;
 
 struct Segment {
 	float dX;
+	float dY;
 	float yMapPosition;
 
 	Segment() {};
-	Segment(float dX, float yMap) : dX(dX), yMapPosition(yMap) {};
+	Segment(float dX, float dY, float yMap) : dX(dX), dY(dY), yMapPosition(yMap) {};
 };
 
 
@@ -33,6 +33,9 @@ public:
 	bool Start();
 	update_status Update();
 	bool CleanUp();
+
+	int DrawUphill(int screenY, float worldPosition, float scaleFactor, float x);
+	int DrawDownhill(int screenY, float worldPosition, float scaleFactor, float x);
 
 public:
 	SDL_Texture* background = nullptr;
