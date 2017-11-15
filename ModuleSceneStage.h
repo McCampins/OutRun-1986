@@ -4,9 +4,10 @@
 #define roadHeightWorld -200
 #define roadHeightScreen 200
 
-#define roadWidth 1500
+#define roadWidth 250
 #define rumbleWidth 50
-#define terrainWidth 2000
+#define lineWidth 24
+#define terrainWidth 4000
 
 #include <cmath>
 #include "Module.h"
@@ -34,8 +35,7 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	int DrawUphill(int screenY, float worldPosition, float scaleFactor, float x);
-	int DrawDownhill(int screenY, float worldPosition, float scaleFactor, float x);
+	int DrawRoads(int screenY, float worldPosition, float scaleFactor, float x);
 
 public:
 	SDL_Texture* background = nullptr;
