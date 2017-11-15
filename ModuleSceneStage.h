@@ -17,10 +17,12 @@ struct SDL_Texture;
 struct Segment {
 	float dX;
 	float dY;
+	float roadSeparation;
 	float yMapPosition;
+	float axisModifier;
 
 	Segment() {};
-	Segment(float dX, float dY, float yMap) : dX(dX), dY(dY), yMapPosition(yMap) {};
+	Segment(float dX, float dY, float roadSeparation, float yMap, float axisModifier) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), axisModifier(axisModifier) {};
 };
 
 
@@ -35,7 +37,7 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	int DrawRoads(int screenY, float worldPosition, float scaleFactor, float x);
+	int DrawRoads(int screenY, float worldPosition, float scaleFactor, float x, float roadSeparation);
 
 public:
 	SDL_Texture* background = nullptr;
