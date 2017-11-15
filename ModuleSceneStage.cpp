@@ -33,9 +33,21 @@ bool ModuleSceneStage::Start()
 		zMap.push_back(z);
 	}
 
-	Segment s = { 0.0f, 0.0f, 500.0f, 0.0f, CameraPosition::LEFTROAD };
+	Segment s = { 0.0f, 0.0f, 500.0f, 0.0f, CameraMove::LEFTTOLEFT };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraPosition::CENTER };
+	s = { 0.0f, 0.0f, 400.0f, (float)zMap.size(), CameraMove::LEFTTOCENTER };
+	stageSegments.push_back(s);
+	s = { 0.0f, UPHILL, 200.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER };
+	stageSegments.push_back(s);
+	s = { 0.0f, DOWNHILL, 100.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER };
+	stageSegments.push_back(s);
+	s = { LEFTCURVE, 0.0f, 50.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER };
+	stageSegments.push_back(s);
+	s = { LEFTCURVE, 0.0f, 50.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER };
+	stageSegments.push_back(s);
+	s = { 0.0f, 0.0f, 50.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER };
+	stageSegments.push_back(s);
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER };
 	stageSegments.push_back(s);
 
 	bottomSegment = stageSegments.at(currentSegment);
@@ -80,7 +92,10 @@ update_status ModuleSceneStage::Update()
 	float finalRoadSeparation = topSegment.roadSeparation;
 	float separationInterval = abs(finalRoadSeparation - initialRoadSeparation);
 	float roadSeparation;
-	
+
+	if (topSegment.yMapPosition < 1.0f) {
+		topSegment.yMapPosition = 0.0f;
+	}
 	float segmentFactor = topSegment.yMapPosition / zMap.size();
 	float axisModifier;
 
@@ -101,13 +116,26 @@ update_status ModuleSceneStage::Update()
 		x += ddX;
 
 		switch (bottomSegment.pos) {
-		case CameraPosition::LEFTROAD:
+		case CameraMove::LEFTTOLEFT:
+			axisModifier = (-(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f));
+			break;
+		case CameraMove::LEFTTOCENTER:
 			axisModifier = (-(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f)) * segmentFactor;
 			break;
-		case CameraPosition::CENTER:
+		case CameraMove::CENTERTOCENTER:
 			axisModifier = 0;
 			break;
-		case CameraPosition::RIGHTROAD:
+		case CameraMove::CENTERTOLEFT:
+			axisModifier = (-(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f)) * -(1 - segmentFactor);
+			break;
+		case CameraMove::CENTERTORIGHT:
+			axisModifier = ((roadWidth * scaleFactor * 1.5f) + (lineWidth * scaleFactor * 1.5f)) * -(1 - segmentFactor);
+			break;
+		case CameraMove::RIGHTTORIGHT:
+			axisModifier = ((roadWidth * scaleFactor * 1.5f) + (lineWidth * scaleFactor * 1.5f));
+			break;
+		case CameraMove::RIGHTTOCENTER:
+			axisModifier = ((roadWidth * scaleFactor * 1.5f) + (lineWidth * scaleFactor * 1.5f)) * segmentFactor;
 			break;
 		}
 		x = centerScreen - axisModifier;
@@ -147,9 +175,6 @@ update_status ModuleSceneStage::Update()
 	}
 
 	topSegment.yMapPosition -= App->player->speed;
-	if (topSegment.yMapPosition < 1.0f) {
-		topSegment.yMapPosition = 0.0f;
-	}
 	if (topSegment.yMapPosition < 0) {
 		bottomSegment = topSegment;
 		if (currentSegment < stageSegments.size() - 1) {
@@ -157,7 +182,7 @@ update_status ModuleSceneStage::Update()
 			currentSegment++;
 		}
 		else {
-			topSegment = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraPosition::CENTER };
+			topSegment = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER };
 		}
 	}
 

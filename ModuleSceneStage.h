@@ -9,15 +9,24 @@
 #define lineWidth 24
 #define terrainWidth 4000
 
+#define LEFTCURVE -0.0075f
+#define RIGHTCURVE 0.0075f
+#define UPHILL 1.0f
+#define DOWNHILL -1.0f
+
 #include <cmath>
 #include "Module.h"
 
 struct SDL_Texture;
 
-enum class CameraPosition {
-	LEFTROAD,
-	CENTER,
-	RIGHTROAD
+enum class CameraMove {
+	LEFTTOLEFT,
+	LEFTTOCENTER,
+	CENTERTOLEFT,
+	CENTERTOCENTER,
+	CENTERTORIGHT,
+	RIGHTTORIGHT,
+	RIGHTTOCENTER
 };
 
 struct Segment {
@@ -25,10 +34,10 @@ struct Segment {
 	float dY;
 	float roadSeparation;
 	float yMapPosition;
-	CameraPosition pos;
+	CameraMove pos;
 
 	Segment() {};
-	Segment(float dX, float dY, float roadSeparation, float yMap, CameraPosition pos) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), pos(pos) {};
+	Segment(float dX, float dY, float roadSeparation, float yMap, CameraMove pos) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), pos(pos) {};
 };
 
 
