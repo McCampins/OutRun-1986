@@ -4,13 +4,15 @@
 #define roadHeightWorld -200
 #define roadHeightScreen 200
 
-#define roadWidth 250
+#define roadWidth 450
 #define rumbleWidth 50
 #define lineWidth 24
 #define terrainWidth 4000
 
-#define LEFTCURVE -0.0075f
-#define RIGHTCURVE 0.0075f
+#define SOFTLEFTCURVE -0.01f
+#define SOFTRIGHTCURVE 0.01f
+#define HARDLEFTCURVE -0.02f
+#define HARDRIGHTCURVE 0.02f
 #define UPHILL 1.0f
 #define DOWNHILL -1.0f
 

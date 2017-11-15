@@ -42,15 +42,15 @@ update_status ModulePlayer::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
-		position += 0.001f;
+		position += 0.005f;
 		speed = 1.0f;
 		moving = true;
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
 	{
-		position += 0.007f;
-		speed = 1.1f;
+		position += 0.01f;
+		speed = 1.5f;
 		moving = true;
 	}
 
