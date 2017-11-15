@@ -242,6 +242,7 @@ update_status ModuleSceneStage::Update()
 		if (dY < 0) {
 			if (y > 575) {
 				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 				y--;
 			}
 		}
