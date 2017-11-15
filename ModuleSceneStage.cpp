@@ -33,9 +33,9 @@ bool ModuleSceneStage::Start()
 		zMap.push_back(z);
 	}
 
-	Segment s = { 0.0f, 0.0f, 500.0f, 0.0f, 0.0f };
+	Segment s = { 0.0f, 0.0f, 500.0f, 0.0f, CameraPosition::LEFTROAD };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 50.0f, (float)zMap.size(), 0.0f };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraPosition::CENTER };
 	stageSegments.push_back(s);
 
 	bottomSegment = stageSegments.at(currentSegment);
@@ -78,9 +78,11 @@ update_status ModuleSceneStage::Update()
 
 	float initialRoadSeparation = bottomSegment.roadSeparation;
 	float finalRoadSeparation = topSegment.roadSeparation;
-	float roadSeparation = initialRoadSeparation;
+	float separationInterval = abs(finalRoadSeparation - initialRoadSeparation);
+	float roadSeparation;
+	
 	float segmentFactor = topSegment.yMapPosition / zMap.size();
-	float axisModifier = 0;
+	float axisModifier;
 
 	for (unsigned int i = 0; i < zMap.size(); i++) {
 		z = zMap.at(i);
@@ -98,8 +100,19 @@ update_status ModuleSceneStage::Update()
 		ddX += dX;
 		x += ddX;
 
-		axisModifier = -(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f) * segmentFactor;
+		switch (bottomSegment.pos) {
+		case CameraPosition::LEFTROAD:
+			axisModifier = (-(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f)) * segmentFactor;
+			break;
+		case CameraPosition::CENTER:
+			axisModifier = 0;
+			break;
+		case CameraPosition::RIGHTROAD:
+			break;
+		}
 		x = centerScreen - axisModifier;
+
+		roadSeparation = initialRoadSeparation - (separationInterval * -(-1 + segmentFactor));
 
 		float worldPosition = z + App->player->position;
 
@@ -134,6 +147,9 @@ update_status ModuleSceneStage::Update()
 	}
 
 	topSegment.yMapPosition -= App->player->speed;
+	if (topSegment.yMapPosition < 1.0f) {
+		topSegment.yMapPosition = 0.0f;
+	}
 	if (topSegment.yMapPosition < 0) {
 		bottomSegment = topSegment;
 		if (currentSegment < stageSegments.size() - 1) {
@@ -141,7 +157,7 @@ update_status ModuleSceneStage::Update()
 			currentSegment++;
 		}
 		else {
-			topSegment = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), 0.0f };
+			topSegment = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraPosition::CENTER };
 		}
 	}
 
@@ -164,8 +180,7 @@ int ModuleSceneStage::DrawRoads(int screenY, float worldPosition, float scaleFac
 		App->renderer->DrawHorizontalLine(x - (roadWidth * scaleFactor * 2) - (lineWidth * scaleFactor * 2) + App->renderer->camera.x, screenY, lineWidth * scaleFactor, 255, 255, 255, 255);
 		//2nd Road
 		App->renderer->DrawHorizontalLine(x - (roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f) + App->renderer->camera.x, screenY, roadWidth * scaleFactor, 161, 160, 161, 255);
-		float test = x - (roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f);
-		float test2 = App->renderer->camera.x;
+		float test = -(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f);
 		//2nd Road - 3rd Road Line
 		App->renderer->DrawHorizontalLine(x - (roadWidth * scaleFactor) - (lineWidth * scaleFactor) + App->renderer->camera.x, screenY, lineWidth * scaleFactor, 255, 255, 255, 255);
 		//Rigth Road Rumble (before 3rd Road in case both roads intersect)

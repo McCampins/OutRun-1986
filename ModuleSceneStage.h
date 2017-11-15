@@ -14,15 +14,21 @@
 
 struct SDL_Texture;
 
+enum class CameraPosition {
+	LEFTROAD,
+	CENTER,
+	RIGHTROAD
+};
+
 struct Segment {
 	float dX;
 	float dY;
 	float roadSeparation;
 	float yMapPosition;
-	float axisModifier;
+	CameraPosition pos;
 
 	Segment() {};
-	Segment(float dX, float dY, float roadSeparation, float yMap, float axisModifier) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), axisModifier(axisModifier) {};
+	Segment(float dX, float dY, float roadSeparation, float yMap, CameraPosition pos) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), pos(pos) {};
 };
 
 
