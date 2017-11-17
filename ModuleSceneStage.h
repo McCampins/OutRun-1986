@@ -31,15 +31,22 @@ enum class CameraMove {
 	RIGHTTOCENTER
 };
 
+enum class Inclination {
+	UP,
+	CENTER,
+	DOWN
+};
+
 struct Segment {
 	float dX;
 	float dY;
 	float roadSeparation;
 	float yMapPosition;
 	CameraMove pos;
+	Inclination inc;
 
 	Segment() {};
-	Segment(float dX, float dY, float roadSeparation, float yMap, CameraMove pos) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), pos(pos) {};
+	Segment(float dX, float dY, float roadSeparation, float yMap, CameraMove pos, Inclination inc) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), pos(pos), inc(inc) {};
 };
 
 
@@ -58,6 +65,7 @@ public:
 
 public:
 	SDL_Texture* background = nullptr;
+	SDL_Texture* player = nullptr;
 	std::vector<float> zMap;
 	std::vector<Segment> stageSegments;
 	unsigned int currentSegment = 0;
