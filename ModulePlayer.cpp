@@ -13,8 +13,11 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 {
 	//FORWARD 
 
-	// idle animation (forward movement with no hill)
+	// idle animation (stopped movement with no hill)
 	idle.frames.push_back({ 0, 44, 90, 41 });
+
+	//idel (stopped uphill)
+	idleUp.frames.push_back({ 0, 0, 90, 44 });
 
 	// forward movement with no hill
 	forward.frames.push_back({ 0, 44, 90, 41 });
@@ -36,6 +39,9 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 	//idle left (no movement but turned left)
 	idleLeft.frames.push_back({ 656, 165, 84, 41 });
 
+	//idle left (going uphill)
+	idleUpLeft.frames.push_back({ 653, 121, 86, 44 });
+
 	//turn left (no hill)
 	left.frames.push_back({ 656, 165, 84, 41 });
 	left.frames.push_back({ 564, 165, 84, 41 });
@@ -51,6 +57,9 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 	//idle right (no movement but turned right)
 	idleRight.frames.push_back({ 0, 165, 84, 41 });
 
+	//idle right (going uphill)
+	idleUpRight.frames.push_back({ 0, 121, 84, 44 });
+
 	//turn right (no hill)
 	right.frames.push_back({ 0, 165, 84, 41 });
 	right.frames.push_back({ 92, 165, 84, 41 });
@@ -62,9 +71,36 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 	rightUp.speed = 0.2f;
 
 	//BREAK
+
+	//break while going forward
 	breakCenter.frames.push_back({ 186, 44, 90, 41 });
 	breakCenter.frames.push_back({ 281, 44, 90, 41 });
 	breakCenter.speed = 0.2f;
+
+	//break while turning left
+	breakLeft.frames.push_back({ 375, 165, 84, 41 });
+	breakLeft.frames.push_back({ 470, 165, 84, 41 });
+	breakLeft.speed = 0.2f;
+
+	//break while turning right
+	breakRight.frames.push_back({ 186, 165, 84, 41 });
+	breakRight.frames.push_back({ 281, 165, 84, 41 });
+	breakRight.speed = 0.2f;
+
+	//break while going uphill
+	breakUp.frames.push_back({ 186, 0, 90, 44 });
+	breakUp.frames.push_back({ 281, 0, 90, 44 });
+	breakUp.speed = 0.2f;
+
+	//break while turning left and going uphill
+	breakUpLeft.frames.push_back({ 372, 121, 86, 44 });
+	breakUpLeft.frames.push_back({ 467, 121, 86, 44 });
+	breakUpLeft.speed = 0.2f;
+
+	//break while turning right and going uphill
+	breakUpRight.frames.push_back({ 186, 121, 84, 44 });
+	breakUpRight.frames.push_back({ 281, 121, 84, 44 });
+	breakUpRight.speed = 0.2f;
 
 	//Passengers
 	malePlayer.frames.push_back({ 389, 15, 24, 15 });
@@ -104,6 +140,13 @@ update_status ModulePlayer::Update()
 	bool moving = false;
 	bool turnLeft = false;
 	bool turnRight = false;
+	Segment s;
+	if (App->scene_stage->topSegment.yMapPosition < 55) {
+		s = App->scene_stage->topSegment;
+	}
+	else {
+		s = App->scene_stage->bottomSegment;
+	}
 
 	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
@@ -121,36 +164,29 @@ update_status ModulePlayer::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
-		Segment s;
-		if (App->scene_stage->topSegment.yMapPosition < 55) {
-			s = App->scene_stage->topSegment;
-		}
-		else {
-			s = App->scene_stage->bottomSegment;
-		}
 		switch (s.inc) {
 		case Inclination::UP:
 			if (turnLeft) {
-				currentCar = &leftUp;
+				currentCar = &breakUpLeft;
 				playersDx = 4;
 			}
 			else if (turnRight) {
-				currentCar = &rightUp;
+				currentCar = &breakUpRight;
 				playersDx = -4;
 			}
 			else {
-				currentCar = &forwardUp;
+				currentCar = &breakUp;
 				playersDx = 0;
 			}
 			break;
 		case Inclination::CENTER:
 		case Inclination::DOWN:
 			if (turnLeft) {
-				currentCar = &left;
+				currentCar = &breakLeft;
 				playersDx = 4;
 			}
 			else if (turnRight) {
-				currentCar = &right;
+				currentCar = &breakRight;
 				playersDx = -4;
 			}
 			else {
@@ -161,24 +197,20 @@ update_status ModulePlayer::Update()
 		}
 		if (playerSpeed > 0.0f) {
 			playerSpeed -= 0.1f;
-			if (playerSpeed < 0.0f)
+			if (playerSpeed < 0.0f) {
 				playerSpeed = 0.0f;
+				moving = false;
+			}
+			else {
+				moving = true;
+			}
 		}
-		if (playerSpeed )
 		position += playerSpeed;
 		curveSpeed = 0.0f;
-		moving = true;
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
 	{
-		Segment s;
-		if (App->scene_stage->topSegment.yMapPosition < 55) {
-			s = App->scene_stage->topSegment;
-		}
-		else {
-			s = App->scene_stage->bottomSegment;
-		}
 		switch (s.inc) {
 		case Inclination::UP:
 			if (turnLeft) {
@@ -210,6 +242,7 @@ update_status ModulePlayer::Update()
 			}
 			break;
 		}
+		playerSpeed += 0.1f;
 		position += playerSpeed;
 		curveSpeed = 1.5f;
 		moving = true;
@@ -217,16 +250,43 @@ update_status ModulePlayer::Update()
 
 	if (moving == false) {
 		if (turnLeft) {
-			currentCar = &idleLeft;
 			playersDx = 4;
+
+			switch (s.inc) {
+			case Inclination::UP:
+				currentCar = &idleUpLeft;
+				break;
+			case Inclination::CENTER:
+			case Inclination::DOWN:
+				currentCar = &idleLeft;
+				break;
+			}
 		}
 		else if (turnRight) {
-			currentCar = &idleRight;
 			playersDx = -4;
+
+			switch (s.inc) {
+			case Inclination::UP:
+				currentCar = &idleUpRight;
+				break;
+			case Inclination::CENTER:
+			case Inclination::DOWN:
+				currentCar = &idleRight;
+				break;
+			}
 		}
 		else {
 			playersDx = 0;
-			currentCar = &idle;
+
+			switch (s.inc) {
+			case Inclination::UP:
+				currentCar = &idleUp;
+				break;
+			case Inclination::CENTER:
+			case Inclination::DOWN:
+				currentCar = &idle;
+				break;
+			}
 		}
 		curveSpeed = 0.0f;
 	}

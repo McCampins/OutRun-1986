@@ -20,14 +20,17 @@ public:
 	SDL_Texture* car = nullptr;
 	Animation* currentCar = nullptr;
 	Animation idle;
+	Animation idleUp;
 	Animation forward;
 	Animation forwardUp;
 	Animation forwardDown;
 	Animation idleLeft;
+	Animation idleUpLeft;
 	Animation left;
 	Animation leftUp;
 	Animation leftDown;
 	Animation idleRight;
+	Animation idleUpRight;
 	Animation right;
 	Animation rightUp;
 	Animation rightDown;
@@ -41,7 +44,7 @@ public:
 	Animation femalePlayer;
 	int playersDx = 0;
 	float position = 0.0f;
-	float playerSpeed = 0.01f;
+	float playerSpeed = 0.1f;
 	float curveSpeed = 0.0f;
 };
 
