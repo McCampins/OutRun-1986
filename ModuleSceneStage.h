@@ -67,6 +67,7 @@ public:
 	SDL_Texture* background = nullptr;
 	SDL_Texture* player = nullptr;
 	std::vector<float> zMap;
+	std::vector<float> factorMap;
 	std::vector<Segment> stageSegments;
 	unsigned int currentSegment = 0;
 	Segment topSegment;

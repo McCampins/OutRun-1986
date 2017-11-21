@@ -29,10 +29,18 @@ bool ModuleSceneStage::Start()
 	App->particles->Enable();
 	App->collision->Enable();
 
+	int y = SCREEN_HEIGHT * SCREEN_SIZE;
+	int minY = SCREEN_HEIGHT * SCREEN_SIZE - roadHeightScreen;
+	int maxY = y;
+	float scaleFactor;
 	for (int i = 0; i < roadHeightScreen; i++)
 	{
 		float z = (float)roadHeightWorld / (i - ((SCREEN_HEIGHT * SCREEN_SIZE) / 2));
 		zMap.push_back(z);
+		scaleFactor = (float)(y - minY) / (maxY - minY);
+		scaleFactor = (scaleFactor * 0.95f) + 0.05f;
+		factorMap.push_back(scaleFactor);
+		y--;
 	}
 
 	//STAGE 1
@@ -174,9 +182,9 @@ update_status ModuleSceneStage::Update()
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
 	float centerScreen = x;
 	int y = SCREEN_HEIGHT * SCREEN_SIZE;
-	int screenY = y;
 	int minY = SCREEN_HEIGHT * SCREEN_SIZE - roadHeightScreen;
 	int maxY = y;
+	int screenY = y;
 	float scaleFactor;
 	float z;
 
@@ -196,10 +204,13 @@ update_status ModuleSceneStage::Update()
 	float axisModifier;
 	float previousAxis = 0;
 
+	int lastDrawnLine = 0;
+	bool inTopSegment = false;
+
 	for (unsigned int i = 0; i < zMap.size(); i++) {
 		z = zMap.at(i);
-		scaleFactor = (float)(y - minY) / (maxY - minY);
-		scaleFactor = (scaleFactor * 0.95f) + 0.05f;
+
+		scaleFactor = factorMap.at(i);
 
 		switch (bottomSegment.pos) {
 		case CameraMove::LEFTTOLEFT:
@@ -232,6 +243,7 @@ update_status ModuleSceneStage::Update()
 			dY = bottomSegment.dY;
 		}
 		else {
+			inTopSegment = true;
 			dX = topSegment.dX;
 			dY = topSegment.dY;
 		}
@@ -243,8 +255,48 @@ update_status ModuleSceneStage::Update()
 		float worldPosition = z + App->player->position;
 
 		if (dY < 0) {
-			if (y > 575
-				) {
+			float percentage = 0.0f;
+			if (inTopSegment == true) {
+				percentage = (float)(i - topSegment.yMapPosition) / (zMap.size() - topSegment.yMapPosition);
+			}
+			else {
+				percentage = (float)i / topSegment.yMapPosition;
+			}
+			if (percentage < 0.5f)
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+			if (percentage < 0.25f)
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+			if (percentage < 0.15f)
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+		}
+		else if (dY > 0) {
+			float percentage = 0.0f;
+			if (inTopSegment == true) {
+				percentage = (float) (i - topSegment.yMapPosition) / (zMap.size() - topSegment.yMapPosition);
+			}
+			else {
+				percentage = (float)i / topSegment.yMapPosition;
+			}
+			if (percentage < 0.2f) {
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+			}
+			else if (percentage < 0.7f) {
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+			}
+			else {
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+			}
+		}
+		else {
+				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+		}
+
+		/*
+		if (dY < 0) {
+			if (y > 575) {
 				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 				y--;
@@ -264,6 +316,8 @@ update_status ModuleSceneStage::Update()
 			screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 			y--;
 		}
+		*/
+		lastDrawnLine = screenY;
 	}
 
 	topSegment.yMapPosition -= App->player->curveSpeed;
