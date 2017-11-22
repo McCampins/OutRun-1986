@@ -134,12 +134,34 @@ bool ModulePlayer::CleanUp()
 	return true;
 }
 
+bool ModulePlayer::keyPressed(int direction, int keysPressed)
+{
+	switch (direction) {
+	//LEFT
+	case 0:
+		return (keysPressed & 1) != 0;
+		break;
+	//RIGHT
+	case 1:
+		return (keysPressed & 2) != 0;
+		break;
+	//UP
+	case 2:
+		return (keysPressed & 4) != 0;
+		break;
+	//DOWN
+	case 3:
+		return (keysPressed & 8) != 0;
+		break;
+	}
+	return false;
+}
+
 // Update: draw background
 update_status ModulePlayer::Update()
 {
-	bool moving = false;
-	bool turnLeft = false;
-	bool turnRight = false;
+	unsigned int keysPressed = 0;
+
 	Segment s;
 	if (App->scene_stage->topSegment.yMapPosition < 55) {
 		s = App->scene_stage->topSegment;
@@ -150,27 +172,23 @@ update_status ModulePlayer::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
-		turnLeft = true;
+		keysPressed += 1;
 	}
 	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
-		turnRight = true;
-	}
-
-	if (turnLeft && turnRight) {
-		turnLeft = false;
-		turnRight = false;
+		keysPressed += 2;
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
+		keysPressed += 4;
 		switch (s.inc) {
 		case Inclination::UP:
-			if (turnLeft) {
+			if (keyPressed(0, keysPressed)) {
 				currentCar = &breakUpLeft;
 				playersDx = 4;
 			}
-			else if (turnRight) {
+			else if (keyPressed(1, keysPressed)) {
 				currentCar = &breakUpRight;
 				playersDx = -4;
 			}
@@ -181,11 +199,11 @@ update_status ModulePlayer::Update()
 			break;
 		case Inclination::CENTER:
 		case Inclination::DOWN:
-			if (turnLeft) {
+			if (keyPressed(0, keysPressed)) {
 				currentCar = &breakLeft;
 				playersDx = 4;
 			}
-			else if (turnRight) {
+			else if (keyPressed(1, keysPressed)) {
 				currentCar = &breakRight;
 				playersDx = -4;
 			}
@@ -196,28 +214,23 @@ update_status ModulePlayer::Update()
 			break;
 		}
 		if (playerSpeed > 0.0f) {
-			playerSpeed -= 0.1f;
+			playerSpeed -= ACCELERATION;
 			if (playerSpeed < 0.0f) {
 				playerSpeed = 0.0f;
-				moving = false;
-			}
-			else {
-				moving = true;
 			}
 		}
-		position += playerSpeed;
-		curveSpeed = 0.0f;
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
 	{
+		keysPressed += 8;
 		switch (s.inc) {
 		case Inclination::UP:
-			if (turnLeft) {
+			if (keyPressed(0, keysPressed)) {
 				currentCar = &leftUp;
 				playersDx = 4;
 			}
-			else if (turnRight) {
+			else if (keyPressed(1, keysPressed)) {
 				currentCar = &rightUp;
 				playersDx = -4;
 			}
@@ -228,11 +241,11 @@ update_status ModulePlayer::Update()
 			break;
 		case Inclination::CENTER:
 		case Inclination::DOWN:
-			if (turnLeft) {
+			if (keyPressed(0, keysPressed)) {
 				currentCar = &left;
 				playersDx = 4;
 			}
-			else if (turnRight) {
+			else if (keyPressed(1, keysPressed)) {
 				currentCar = &right;
 				playersDx = -4;
 			}
@@ -242,14 +255,22 @@ update_status ModulePlayer::Update()
 			}
 			break;
 		}
-		playerSpeed += 0.1f;
-		position += playerSpeed;
-		curveSpeed = 1.5f;
-		moving = true;
+		if (playerSpeed < MAX_SPEED) {
+			playerSpeed += ACCELERATION;
+			if (playerSpeed > MAX_SPEED)
+				playerSpeed = MAX_SPEED;
+		}
 	}
 
-	if (moving == false) {
-		if (turnLeft) {
+	if (keyPressed(3, keysPressed) == false && keyPressed(4, keysPressed) == false) {
+		playerSpeed -= ACCELERATION / 2;
+		if (playerSpeed < 0.0f) {
+			playerSpeed = 0.0f;
+		}
+	}
+
+	if (playerSpeed == 0.0f) {
+		if (keyPressed(0, keysPressed)) {
 			playersDx = 4;
 
 			switch (s.inc) {
@@ -262,7 +283,7 @@ update_status ModulePlayer::Update()
 				break;
 			}
 		}
-		else if (turnRight) {
+		else if (keyPressed(1, keysPressed)) {
 			playersDx = -4;
 
 			switch (s.inc) {
@@ -288,8 +309,10 @@ update_status ModulePlayer::Update()
 				break;
 			}
 		}
-		curveSpeed = 0.0f;
 	}
+
+	position += playerSpeed;
+	curveSpeed = playerSpeed * 5;
 
 	App->renderer->Blit(car, (SCREEN_WIDTH - 92) / 2, SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
 	App->renderer->Blit(car, (SCREEN_WIDTH - 50 + playersDx) / 2, SCREEN_HEIGHT - 50, &(malePlayer.GetCurrentFrame()));

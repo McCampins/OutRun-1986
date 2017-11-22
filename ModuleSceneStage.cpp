@@ -204,7 +204,6 @@ update_status ModuleSceneStage::Update()
 	float axisModifier;
 	float previousAxis = 0;
 
-	int lastDrawnLine = 0;
 	bool inTopSegment = false;
 
 	for (unsigned int i = 0; i < zMap.size(); i++) {
@@ -252,8 +251,8 @@ update_status ModuleSceneStage::Update()
 
 		roadSeparation = initialRoadSeparation - (separationInterval * -(-1 + segmentFactor));
 
-		float worldPosition = z + App->player->position;
-
+		float worldPosition = (z * 10) + App->player->position;
+	
 		if (dY < 0) {
 			float percentage = 0.0f;
 			if (inTopSegment == true) {
@@ -266,7 +265,7 @@ update_status ModuleSceneStage::Update()
 				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 			if (percentage < 0.25f)
 				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-			if (percentage < 0.15f)
+			if (percentage < 0.05f)
 				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 		}
 		else if (dY > 0) {
@@ -291,33 +290,8 @@ update_status ModuleSceneStage::Update()
 			}
 		}
 		else {
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-		}
-
-		/*
-		if (dY < 0) {
-			if (y > 575) {
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-				y--;
-			}
-		}
-		else if (dY > 0) {
 			screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-			if (screenY < 650) {
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-				if (screenY < 500) {
-					screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-				}
-			}
-			y--;
 		}
-		else {
-			screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-			y--;
-		}
-		*/
-		lastDrawnLine = screenY;
 	}
 
 	topSegment.yMapPosition -= App->player->curveSpeed;
@@ -339,7 +313,7 @@ update_status ModuleSceneStage::Update()
 
 int ModuleSceneStage::DrawRoads(int screenY, float worldPosition, float scaleFactor, float x, float roadSeparation) {
 	screenY--;
-	if ((int)(worldPosition * 20) % 2 == 0)
+	if ((int)worldPosition % 2 == 0)
 	{
 		//Terrain
 		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor * scaleFactor, screenY, terrainWidth, 219, 209, 180, 255);

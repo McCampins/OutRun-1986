@@ -4,6 +4,9 @@
 #include "Module.h"
 #include "Animation.h"
 
+#define MAX_SPEED 0.2f
+#define ACCELERATION 0.001f
+
 struct SDL_Texture;
 
 class ModulePlayer : public Module
@@ -15,6 +18,8 @@ public:
 	bool Start();
 	update_status Update();
 	bool CleanUp();
+
+	bool keyPressed(int direction, int keysPressed);
 
 public:
 	SDL_Texture* car = nullptr;
@@ -43,8 +48,9 @@ public:
 	Animation malePlayer;
 	Animation femalePlayer;
 	int playersDx = 0;
+
 	float position = 0.0f;
-	float playerSpeed = 0.1f;
+	float playerSpeed = 0.0f;
 	float curveSpeed = 0.0f;
 };
 
