@@ -161,6 +161,7 @@ bool ModulePlayer::keyPressed(int direction, int keysPressed)
 update_status ModulePlayer::Update()
 {
 	unsigned int keysPressed = 0;
+	float normalizedSpeed = 0.0f;
 
 	Segment s;
 	if (App->scene_stage->topSegment.yMapPosition < 55) {
@@ -169,14 +170,32 @@ update_status ModulePlayer::Update()
 	else {
 		s = App->scene_stage->bottomSegment;
 	}
-
 	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
 		keysPressed += 1;
+		if (playerSpeed > 0.0f) {
+			normalizedSpeed = (MAX_SPEED - playerSpeed) / MAX_SPEED;
+			if (normalizedSpeed < 0.5f) {
+				App->renderer->camera.x += 4;
+			}
+			else {
+				App->renderer->camera.x += 2;
+			}
+
+		}
 	}
 	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
 		keysPressed += 2;
+		if (playerSpeed > 0.0f) {
+			normalizedSpeed = (MAX_SPEED - playerSpeed) / MAX_SPEED;
+			if (normalizedSpeed < 0.5f) {
+				App->renderer->camera.x -= 4;
+			}
+			else {
+				App->renderer->camera.x -= 2;
+			}
+		}
 	}
 
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
@@ -262,8 +281,39 @@ update_status ModulePlayer::Update()
 		}
 	}
 
-	if (keyPressed(3, keysPressed) == false && keyPressed(4, keysPressed) == false) {
+	if (keyPressed(2, keysPressed) == false && keyPressed(3, keysPressed) == false) {
 		playerSpeed -= ACCELERATION / 2;
+		switch (s.inc) {
+		case Inclination::UP:
+			if (keyPressed(0, keysPressed)) {
+				currentCar = &leftUp;
+				playersDx = 4;
+			}
+			else if (keyPressed(1, keysPressed)) {
+				currentCar = &rightUp;
+				playersDx = -4;
+			}
+			else {
+				currentCar = &forwardUp;
+				playersDx = 0;
+			}
+			break;
+		case Inclination::CENTER:
+		case Inclination::DOWN:
+			if (keyPressed(0, keysPressed)) {
+				currentCar = &left;
+				playersDx = 4;
+			}
+			else if (keyPressed(1, keysPressed)) {
+				currentCar = &right;
+				playersDx = -4;
+			}
+			else {
+				currentCar = &forward;
+				playersDx = 0;
+			}
+			break;
+		}
 		if (playerSpeed < 0.0f) {
 			playerSpeed = 0.0f;
 		}
@@ -314,9 +364,9 @@ update_status ModulePlayer::Update()
 	position += playerSpeed;
 	curveSpeed = playerSpeed * 5;
 
-	App->renderer->Blit(car, (SCREEN_WIDTH - 92) / 2, SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
-	App->renderer->Blit(car, (SCREEN_WIDTH - 50 + playersDx) / 2, SCREEN_HEIGHT - 50, &(malePlayer.GetCurrentFrame()));
-	App->renderer->Blit(car, (SCREEN_WIDTH + 6 + playersDx) / 2, SCREEN_HEIGHT - 48, &(femalePlayer.GetCurrentFrame()));
+	App->renderer->Blit(car, ((SCREEN_WIDTH - 92) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
+	App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayer.GetCurrentFrame()));
+	App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayer.GetCurrentFrame()));
 
 	return UPDATE_CONTINUE;
 }

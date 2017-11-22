@@ -44,113 +44,113 @@ bool ModuleSceneStage::Start()
 	}
 
 	//STAGE 1
-	Segment s = { 0.0f, 0.0f, 900.0f, 0.0f, CameraMove::LEFTTOLEFT, Inclination::CENTER };
+	Segment s = { 0.0f, 0.0f, 900.0f, 0.0f, Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 800.0f, (float)zMap.size(), CameraMove::LEFTTOLEFT, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 800.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, UPHILL, 800.0f, (float)zMap.size(), CameraMove::LEFTTOLEFT, Inclination::UP };
+	s = { 0.0f, UPHILL, 800.0f, (float)zMap.size(), Inclination::UP };
 	stageSegments.push_back(s);
-	s = { 0.0f, DOWNHILL, 400.0f, (float)zMap.size(), CameraMove::LEFTTOLEFT, Inclination::DOWN };
+	s = { 0.0f, DOWNHILL, 400.0f, (float)zMap.size(), Inclination::DOWN };
 	stageSegments.push_back(s);
-	s = { SOFTLEFTCURVE, 0.0f, 400.0f, (float)zMap.size(), CameraMove::LEFTTOLEFT, Inclination::CENTER };
+	s = { SOFTLEFTCURVE, 0.0f, 400.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { SOFTLEFTCURVE, 0.0f, 400.0f, (float)zMap.size(), CameraMove::LEFTTOLEFT, Inclination::CENTER };
+	s = { SOFTLEFTCURVE, 0.0f, 400.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 400.0f, (float)zMap.size(), CameraMove::LEFTTOLEFT, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 400.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { SOFTRIGHTCURVE, DOWNHILL, 300.0f, (float)zMap.size(), CameraMove::LEFTTOLEFT, Inclination::DOWN };
+	s = { SOFTRIGHTCURVE, DOWNHILL, 300.0f, (float)zMap.size(), Inclination::DOWN };
 	stageSegments.push_back(s);
-	s = { 0.0f, DOWNHILL, 100.0f, (float)zMap.size(), CameraMove::LEFTTOCENTER, Inclination::DOWN };
+	s = { 0.0f, DOWNHILL, 100.0f, (float)zMap.size(), Inclination::DOWN };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { SOFTLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { SOFTLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { SOFTLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { SOFTLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { SOFTRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { SOFTRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, UPHILL, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::UP };
+	s = { HARDLEFTCURVE, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, DOWNHILL, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::DOWN };
+	s = { HARDLEFTCURVE, DOWNHILL, 0.0f, (float)zMap.size(), Inclination::DOWN };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::UP };
+	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
 	stageSegments.push_back(s);
-	s = { 0.0f, DOWNHILL, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::DOWN };
+	s = { 0.0f, DOWNHILL, 0.0f, (float)zMap.size(), Inclination::DOWN };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::UP };
+	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
 	stageSegments.push_back(s);
-	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::UP };
+	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
 	//END OF STAGE 1
 
@@ -201,8 +201,6 @@ update_status ModuleSceneStage::Update()
 		topSegment.yMapPosition = 0.0f;
 	}
 	float segmentFactor = topSegment.yMapPosition / zMap.size();
-	float axisModifier;
-	float previousAxis = 0;
 
 	bool inTopSegment = false;
 
@@ -210,32 +208,6 @@ update_status ModuleSceneStage::Update()
 		z = zMap.at(i);
 
 		scaleFactor = factorMap.at(i);
-
-		switch (bottomSegment.pos) {
-		case CameraMove::LEFTTOLEFT:
-			axisModifier = (-(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f));
-			break;
-		case CameraMove::LEFTTOCENTER:
-			axisModifier = (-(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f)) * segmentFactor;
-			break;
-		case CameraMove::CENTERTOCENTER:
-			axisModifier = 0;
-			break;
-		case CameraMove::CENTERTOLEFT:
-			axisModifier = (-(roadWidth * scaleFactor * 1.5f) - (lineWidth * scaleFactor * 1.5f)) * -(1 - segmentFactor);
-			break;
-		case CameraMove::CENTERTORIGHT:
-			axisModifier = ((roadWidth * scaleFactor * 1.5f) + (lineWidth * scaleFactor * 1.5f)) * -(1 - segmentFactor);
-			break;
-		case CameraMove::RIGHTTORIGHT:
-			axisModifier = ((roadWidth * scaleFactor * 1.5f) + (lineWidth * scaleFactor * 1.5f));
-			break;
-		case CameraMove::RIGHTTOCENTER:
-			axisModifier = ((roadWidth * scaleFactor * 1.5f) + (lineWidth * scaleFactor * 1.5f)) * segmentFactor;
-			break;
-		}
-		x = x + previousAxis - axisModifier;
-		previousAxis = axisModifier;
 
 		if (i < topSegment.yMapPosition) {
 			dX = bottomSegment.dX;
@@ -294,6 +266,7 @@ update_status ModuleSceneStage::Update()
 		}
 	}
 
+	App->renderer->camera.x += curveCameraMove;
 	topSegment.yMapPosition -= App->player->curveSpeed;
 	if (topSegment.yMapPosition < 0) {
 		bottomSegment = topSegment;
@@ -302,7 +275,16 @@ update_status ModuleSceneStage::Update()
 			currentSegment++;
 		}
 		else {
-			topSegment = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), CameraMove::CENTERTOCENTER, Inclination::CENTER };
+			topSegment = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
+		}
+		if (bottomSegment.dX > 0.0f) {
+			curveCameraMove = 3;			
+		}
+		else if (bottomSegment.dX < 0.0f) {
+			curveCameraMove = -3;
+		}
+		else {
+			curveCameraMove = 0;
 		}
 	}
 
@@ -316,7 +298,7 @@ int ModuleSceneStage::DrawRoads(int screenY, float worldPosition, float scaleFac
 	if ((int)worldPosition % 2 == 0)
 	{
 		//Terrain
-		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor * scaleFactor, screenY, terrainWidth, 219, 209, 180, 255);
+		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor, screenY, terrainWidth, 219, 209, 180, 255);
 		//Rumble
 		App->renderer->DrawHorizontalLine(x - (roadWidth * scaleFactor * 3) - (rumbleWidth * scaleFactor / 2) - (lineWidth * scaleFactor * 3.5f) + App->renderer->camera.x * scaleFactor, screenY, rumbleWidth * scaleFactor, 161, 160, 161, 255);
 		//1st Road Line

@@ -7,7 +7,7 @@
 #define roadWidth 450
 #define rumbleWidth 50
 #define lineWidth 24
-#define terrainWidth 4000
+#define terrainWidth 6000
 
 #define SOFTLEFTCURVE -0.01f
 #define SOFTRIGHTCURVE 0.01f
@@ -21,16 +21,6 @@
 
 struct SDL_Texture;
 
-enum class CameraMove {
-	LEFTTOLEFT,
-	LEFTTOCENTER,
-	CENTERTOLEFT,
-	CENTERTOCENTER,
-	CENTERTORIGHT,
-	RIGHTTORIGHT,
-	RIGHTTOCENTER
-};
-
 enum class Inclination {
 	UP,
 	CENTER,
@@ -42,11 +32,10 @@ struct Segment {
 	float dY;
 	float roadSeparation;
 	float yMapPosition;
-	CameraMove pos;
 	Inclination inc;
 
 	Segment() {};
-	Segment(float dX, float dY, float roadSeparation, float yMap, CameraMove pos, Inclination inc) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), pos(pos), inc(inc) {};
+	Segment(float dX, float dY, float roadSeparation, float yMap, Inclination inc) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), inc(inc) {};
 };
 
 
@@ -72,6 +61,7 @@ public:
 	unsigned int currentSegment = 0;
 	Segment topSegment;
 	Segment bottomSegment;
+	int curveCameraMove = 0;
 };
 
 #endif // __MODULESCENESTAGE_H__
