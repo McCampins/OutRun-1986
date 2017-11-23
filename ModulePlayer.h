@@ -23,6 +23,7 @@ public:
 
 public:
 	SDL_Texture* car = nullptr;
+	SDL_Texture* dustTex = nullptr;
 	Animation* currentCar = nullptr;
 	Animation idle;
 	Animation idleUp;
@@ -48,6 +49,8 @@ public:
 	Animation malePlayer;
 	Animation femalePlayer;
 	int playersDx = 0;
+	Animation leftDust;
+	Animation rightDust;
 
 	float position = 0.0f;
 	float playerSpeed = 0.0f;

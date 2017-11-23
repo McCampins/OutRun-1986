@@ -51,6 +51,8 @@ public:
 	bool CleanUp();
 
 	int DrawRoads(int screenY, float worldPosition, float scaleFactor, float x, float roadSeparation);
+	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation);
+	bool CheckRightTire(float x, float scaleFactor, float roadSeparation);
 
 public:
 	SDL_Texture* background = nullptr;
@@ -62,6 +64,8 @@ public:
 	Segment topSegment;
 	Segment bottomSegment;
 	int curveCameraMove = 0;
+	bool leftTireOut = false;
+	bool rigthTireOut = false;
 };
 
 #endif // __MODULESCENESTAGE_H__

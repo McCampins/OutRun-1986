@@ -109,6 +109,20 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 	femalePlayer.frames.push_back({ 419, 16, 15, 12 });
 	femalePlayer.frames.push_back({ 419, 28, 14, 14 });
 	femalePlayer.speed = 0.025f;
+
+	//Dust (left tire)
+	leftDust.frames.push_back({ 0, 29, 68, 33 });
+	leftDust.frames.push_back({ 0, 61, 70, 33 });
+	leftDust.frames.push_back({ 0, 98, 69, 33 });
+	leftDust.frames.push_back({ 0, 133, 72, 33 });
+	leftDust.speed = 0.25f;
+
+	//Dust (right tire)
+	rightDust.frames.push_back({ 79, 29, 68, 33 });
+	rightDust.frames.push_back({ 79, 61, 70, 33 });
+	rightDust.frames.push_back({ 79, 98, 69, 33 });
+	rightDust.frames.push_back({ 79, 133, 72, 33 });
+	rightDust.speed = 0.25f;
 }
 
 ModulePlayer::~ModulePlayer()
@@ -120,6 +134,7 @@ bool ModulePlayer::Start()
 	LOG("Loading player");
 
 	car = App->textures->Load("rtype/ferrari.png");
+	dustTex = App->textures->Load("rtype/dust.png");
 
 	return true;
 }
@@ -137,19 +152,19 @@ bool ModulePlayer::CleanUp()
 bool ModulePlayer::keyPressed(int direction, int keysPressed)
 {
 	switch (direction) {
-	//LEFT
+		//LEFT
 	case 0:
 		return (keysPressed & 1) != 0;
 		break;
-	//RIGHT
+		//RIGHT
 	case 1:
 		return (keysPressed & 2) != 0;
 		break;
-	//UP
+		//UP
 	case 2:
 		return (keysPressed & 4) != 0;
 		break;
-	//DOWN
+		//DOWN
 	case 3:
 		return (keysPressed & 8) != 0;
 		break;
@@ -170,6 +185,7 @@ update_status ModulePlayer::Update()
 	else {
 		s = App->scene_stage->bottomSegment;
 	}
+
 	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
 		keysPressed += 1;
@@ -362,11 +378,29 @@ update_status ModulePlayer::Update()
 	}
 
 	position += playerSpeed;
-	curveSpeed = playerSpeed * 5;
+	curveSpeed = playerSpeed * 10;
 
 	App->renderer->Blit(car, ((SCREEN_WIDTH - 92) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
 	App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayer.GetCurrentFrame()));
 	App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayer.GetCurrentFrame()));
+
+	bool out = false;
+	if (App->scene_stage->leftTireOut) {
+		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE) - 75, SCREEN_HEIGHT - 40, &(leftDust.GetCurrentFrame()));
+		out = true;
+	}
+	if (App->scene_stage->rigthTireOut) {
+		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 40, &(rightDust.GetCurrentFrame())); 
+		out = true;
+	}
+	if (out) {
+		if (playerSpeed > 0.05f) {
+			playerSpeed -= ACCELERATION * 2;
+			if (playerSpeed < 0.0f) {
+				playerSpeed = 0.0f;
+			}
+		}
+	}
 
 	return UPDATE_CONTINUE;
 }
