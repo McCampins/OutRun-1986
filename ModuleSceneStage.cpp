@@ -1,3 +1,7 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
 #include "Globals.h"
 #include "Application.h"
 #include "ModuleTextures.h"
@@ -8,7 +12,9 @@
 #include "ModuleParticles.h"
 #include "ModuleSceneStage.h"
 
-// Reference at https://www.youtube.com/watch?v=OEhmUuehGOA
+#include "rapidxml.hpp"
+
+using namespace rapidxml;
 
 ModuleSceneStage::ModuleSceneStage(bool active) : Module(active)
 {
@@ -43,8 +49,92 @@ bool ModuleSceneStage::Start()
 		y--;
 	}
 
+	ifstream inFile("segments.config");
+
+	if (inFile.is_open() == false) {
+		LOG("File not opened --------------");
+		return false;
+	}
+
+	Segment s;
+	//string json;
+	string a, b, c, d;
+	const char* str = nullptr;
+	float dX, dY, separation;
+	Inclination inc;
+
+	xml_document<> doc;
+	xml_node<> * root_node; 
+	vector<char> buffer((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+	buffer.push_back('\0');
+	doc.parse<0>(&buffer[0]);
+
+	root_node = doc.first_node("segment");
+	for (xml_node<> * segment_node = root_node->first_node("info"); segment_node; segment_node = segment_node->next_sibling())
+	{
+		a = segment_node->first_attribute("dX")->value();
+		b = segment_node->first_attribute("dY")->value();
+		c = segment_node->first_attribute("separation")->value();
+		d = segment_node->first_attribute("inclination")->value();
+		
+	}
+
+	 /*
+	while (std::getline(inFile, json)) {
+		str = json.c_str();
+		d.Parse(str);
+		*/
+		/*
+		assert(document.HasMember("dX"));
+		assert(document["dX"].IsString());
+		a = document["dX"].GetString();
+		assert(document.HasMember("dY"));
+		assert(document["dY"].IsString());
+		b = document["dY"].GetString();
+		assert(document.HasMember("separation"));
+		assert(document["separation"].IsFloat());
+		separation = document["separation"].GetFloat();
+		assert(document.HasMember("inclination"));
+		assert(document["inclination"].IsString());
+		c = document["inclination"].GetString();
+		*/
+
+		/*
+		if (b.compare("0") == 0) {
+			dY = 0.0f;
+		}
+		else if (b.compare("UPHILL") == 0) {
+			dY = UPHILL;
+		}
+		else  if (b.compare("DOWNHILL") == 0) {
+			dY = DOWNHILL;
+		}
+		else {
+			LOG("Error reading config file -----------");
+			return false;
+		}
+
+		if (c.compare("Inclination::CENTER") == 0) {
+			inc = Inclination::CENTER;
+		}
+		else if (c.compare("Inclination::DOWN") == 0)
+		{
+			inc = Inclination::DOWN;
+		}
+		else if (c.compare("Inclination::UP") == 0)
+		{
+			inc = Inclination::UP;
+		}
+		else {
+			LOG("Error reading config file -----------");
+			return false;
+		}
+		s = { dX, dY, separation, 0.0f, inc };
+		*/
+	//}
+
 	//STAGE 1
-	Segment s = { 0.0f, 0.0f, 900.0f, 0.0f, Inclination::CENTER };
+	//s = { 0.0f, 0.0f, 900.0f, 0.0f, Inclination::CENTER };
 	stageSegments.push_back(s);
 	s = { 0.0f, 0.0f, 800.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
@@ -180,10 +270,7 @@ update_status ModuleSceneStage::Update()
 {
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
-	float centerScreen = x;
 	int y = SCREEN_HEIGHT * SCREEN_SIZE;
-	int minY = SCREEN_HEIGHT * SCREEN_SIZE - roadHeightScreen;
-	int maxY = y;
 	int screenY = y;
 	float scaleFactor;
 	float z;
@@ -204,6 +291,7 @@ update_status ModuleSceneStage::Update()
 
 	bool inTopSegment = false;
 
+	//Draw lines
 	for (unsigned int i = 0; i < zMap.size(); i++) {
 		z = zMap.at(i);
 
@@ -224,7 +312,8 @@ update_status ModuleSceneStage::Update()
 		roadSeparation = initialRoadSeparation - (separationInterval * -(-1 + segmentFactor));
 
 		float worldPosition = (z * 10) + App->player->position;
-	
+
+		//Check if uphill, downhill or no hill
 		if (dY < 0) {
 			float percentage = 0.0f;
 			if (inTopSegment == true) {
@@ -243,7 +332,7 @@ update_status ModuleSceneStage::Update()
 		else if (dY > 0) {
 			float percentage = 0.0f;
 			if (inTopSegment == true) {
-				percentage = (float) (i - topSegment.yMapPosition) / (zMap.size() - topSegment.yMapPosition);
+				percentage = (float)(i - topSegment.yMapPosition) / (zMap.size() - topSegment.yMapPosition);
 			}
 			else {
 				percentage = (float)i / topSegment.yMapPosition;
@@ -264,13 +353,14 @@ update_status ModuleSceneStage::Update()
 		else {
 			screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 		}
-
+		//If the line we are drawing is the one the tires are placed, check if they are out of the road
 		if (screenY == (SCREEN_HEIGHT - 8) * SCREEN_SIZE) {
 			leftTireOut = CheckLeftTire(x, scaleFactor, roadSeparation);
 			rigthTireOut = CheckRightTire(x, scaleFactor, roadSeparation);
 		}
 	}
 
+	//Update segments
 	App->renderer->camera.x += curveCameraMove;
 	topSegment.yMapPosition -= App->player->curveSpeed;
 	if (topSegment.yMapPosition < 0) {
@@ -283,35 +373,35 @@ update_status ModuleSceneStage::Update()
 			topSegment = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 		}
 	}
+
+	//Update the camera according to the curve and the speed of the player
 	curveCameraMove = 0;
 	if (App->player->playerSpeed != 0.0f) {
 		if (bottomSegment.dX > 0.0f) {
 			float normalize = App->player->playerSpeed / MAX_SPEED;
 			if (normalize < 0.33f) {
-				curveCameraMove = 1;				
-			}
-			else if (normalize < 0.66f) {
 				curveCameraMove = 3;
 			}
-			else {
+			else if (normalize < 0.66f) {
 				curveCameraMove = 6;
+			}
+			else {
+				curveCameraMove = 12;
 			}
 		}
 		else if (bottomSegment.dX < 0.0f) {
 			float normalize = App->player->playerSpeed / MAX_SPEED;
 			if (normalize < 0.33f) {
-				curveCameraMove = -1;
-			}
-			else if (normalize < 0.66f) {
 				curveCameraMove = -3;
 			}
-			else {
+			else if (normalize < 0.66f) {
 				curveCameraMove = -6;
+			}
+			else {
+				curveCameraMove = -12;
 			}
 		}
 	}
-
-	
 
 	return UPDATE_CONTINUE;
 }

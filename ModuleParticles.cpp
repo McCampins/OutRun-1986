@@ -18,8 +18,6 @@ ModuleParticles::~ModuleParticles()
 bool ModuleParticles::Start()
 {
 	LOG("Loading particles");
-	graphics = App->textures->Load("rtype/particles.png");
-
 
 	// TODO 2: Create a prototype for the laser particle
 	// audio: rtype/laser.wav

@@ -104,11 +104,13 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 
 	//Passengers
 	malePlayer.frames.push_back({ 389, 15, 24, 15 });
-	malePlayer.frames.push_back({ 389, 29, 24, 15 });
-	malePlayer.speed = 0.025f;
+	malePlayerMoving.frames.push_back({ 389, 15, 24, 15 });
+	malePlayerMoving.frames.push_back({ 389, 29, 24, 15 });
+	malePlayerMoving.speed = 0.025f;
 	femalePlayer.frames.push_back({ 419, 16, 15, 12 });
-	femalePlayer.frames.push_back({ 419, 28, 14, 14 });
-	femalePlayer.speed = 0.025f;
+	femalePlayerMoving.frames.push_back({ 419, 16, 15, 12 });
+	femalePlayerMoving.frames.push_back({ 419, 28, 14, 14 });
+	femalePlayerMoving.speed = 0.025f;
 
 	//Dust (left tire)
 	leftDust.frames.push_back({ 0, 29, 68, 33 });
@@ -178,6 +180,7 @@ update_status ModulePlayer::Update()
 	unsigned int keysPressed = 0;
 	float normalizedSpeed = 0.0f;
 
+	//Get the segment to know its inclination
 	Segment s;
 	if (App->scene_stage->topSegment.yMapPosition < 55) {
 		s = App->scene_stage->topSegment;
@@ -186,16 +189,18 @@ update_status ModulePlayer::Update()
 		s = App->scene_stage->bottomSegment;
 	}
 
+	//Update camera according to left/right
 	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
 		keysPressed += 1;
 		if (playerSpeed > 0.0f) {
 			normalizedSpeed = (MAX_SPEED - playerSpeed) / MAX_SPEED;
 			if (normalizedSpeed < 0.5f) {
-				App->renderer->camera.x += 4;
+				App->renderer->camera.x += 9;
 			}
 			else {
-				App->renderer->camera.x += 2;
+				if (playerSpeed > 0.05f)
+					App->renderer->camera.x += 3;
 			}
 
 		}
@@ -206,14 +211,16 @@ update_status ModulePlayer::Update()
 		if (playerSpeed > 0.0f) {
 			normalizedSpeed = (MAX_SPEED - playerSpeed) / MAX_SPEED;
 			if (normalizedSpeed < 0.5f) {
-				App->renderer->camera.x -= 4;
+				App->renderer->camera.x -= 9;
 			}
 			else {
-				App->renderer->camera.x -= 2;
+				if (playerSpeed > 0.05f)
+					App->renderer->camera.x -= 3;
 			}
 		}
 	}
 
+	//Update player's speed and car position according to forward/backward
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
 		keysPressed += 4;
@@ -297,6 +304,7 @@ update_status ModulePlayer::Update()
 		}
 	}
 
+	//If no key is pressed, decrement speed
 	if (keyPressed(2, keysPressed) == false && keyPressed(3, keysPressed) == false) {
 		playerSpeed -= ACCELERATION / 2;
 		switch (s.inc) {
@@ -335,6 +343,7 @@ update_status ModulePlayer::Update()
 		}
 	}
 
+	//Adjust animation of car if the car has no speed
 	if (playerSpeed == 0.0f) {
 		if (keyPressed(0, keysPressed)) {
 			playersDx = 4;
@@ -380,17 +389,25 @@ update_status ModulePlayer::Update()
 	position += playerSpeed;
 	curveSpeed = playerSpeed * 10;
 
+	//Draw car and player
 	App->renderer->Blit(car, ((SCREEN_WIDTH - 92) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
-	App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayer.GetCurrentFrame()));
-	App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayer.GetCurrentFrame()));
+	if (playerSpeed > 0.0f) {
+		App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayerMoving.GetCurrentFrame()));
+		App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayerMoving.GetCurrentFrame()));
+	}
+	else {
+		App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayer.GetCurrentFrame()));
+		App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayer.GetCurrentFrame()));
+	}
 
+	//Draw out of road particles
 	bool out = false;
 	if (App->scene_stage->leftTireOut) {
 		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE) - 75, SCREEN_HEIGHT - 40, &(leftDust.GetCurrentFrame()));
 		out = true;
 	}
 	if (App->scene_stage->rigthTireOut) {
-		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 40, &(rightDust.GetCurrentFrame())); 
+		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 40, &(rightDust.GetCurrentFrame()));
 		out = true;
 	}
 	if (out) {
