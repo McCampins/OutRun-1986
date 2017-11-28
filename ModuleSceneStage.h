@@ -55,8 +55,8 @@ public:
 	bool CheckRightTire(float x, float scaleFactor, float roadSeparation);
 
 public:
-	SDL_Texture* background = nullptr;
-	SDL_Texture* player = nullptr;
+	SDL_Texture* background = nullptr; 
+	SDL_Texture* startFlag = nullptr;
 	std::vector<float> zMap;
 	std::vector<float> factorMap;
 	std::vector<Segment> stageSegments;
@@ -66,6 +66,9 @@ public:
 	int curveCameraMove = 0;
 	bool leftTireOut = false;
 	bool rigthTireOut = false;
+
+	SDL_Rect leftStart;
+	SDL_Rect rightStart;
 };
 
 #endif // __MODULESCENESTAGE_H__

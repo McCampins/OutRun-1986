@@ -24,7 +24,10 @@ public:
 public:
 	SDL_Texture* car = nullptr;
 	SDL_Texture* dustTex = nullptr;
+	SDL_Texture* startFlag = nullptr;
+
 	Animation* currentCar = nullptr;
+
 	Animation idle;
 	Animation idleUp;
 	Animation forward;
@@ -46,11 +49,13 @@ public:
 	Animation breakUpLeft;
 	Animation breakUp;
 	Animation breakUpRight;
+
 	Animation malePlayer;
 	Animation femalePlayer;
 	Animation malePlayerMoving;
 	Animation femalePlayerMoving;
 	int playersDx = 0;
+
 	Animation leftDust;
 	Animation rightDust;
 

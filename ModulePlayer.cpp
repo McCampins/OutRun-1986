@@ -137,6 +137,7 @@ bool ModulePlayer::Start()
 
 	car = App->textures->Load("rtype/ferrari.png");
 	dustTex = App->textures->Load("rtype/dust.png");
+	startFlag = App->textures->Load("rtype/startflag.png");
 
 	return true;
 }

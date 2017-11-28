@@ -18,6 +18,16 @@ using namespace rapidxml;
 
 ModuleSceneStage::ModuleSceneStage(bool active) : Module(active)
 {
+	leftStart.x = 0;
+	leftStart.y = 0;
+	leftStart.w = 297;
+	leftStart.h = 80;
+
+	rightStart.x = 0;
+	rightStart.y = 150;
+	rightStart.w = 303;
+	rightStart.h = 74;
+
 }
 
 ModuleSceneStage::~ModuleSceneStage()
@@ -28,6 +38,8 @@ ModuleSceneStage::~ModuleSceneStage()
 bool ModuleSceneStage::Start()
 {
 	LOG("Loading stage scene");
+
+	startFlag = App->textures->Load("rtype/startflag.png");
 
 	//background = App->textures->Load("rtype/background.png");
 
@@ -57,7 +69,8 @@ bool ModuleSceneStage::Start()
 	}
 
 	Segment s;
-	//string json;
+	
+	/*
 	string a, b, c, d;
 	const char* str = nullptr;
 	float dX, dY, separation;
@@ -78,6 +91,7 @@ bool ModuleSceneStage::Start()
 		d = segment_node->first_attribute("inclination")->value();
 		
 	}
+	*/
 
 	 /*
 	while (std::getline(inFile, json)) {
@@ -134,7 +148,7 @@ bool ModuleSceneStage::Start()
 	//}
 
 	//STAGE 1
-	//s = { 0.0f, 0.0f, 900.0f, 0.0f, Inclination::CENTER };
+	s = { 0.0f, 0.0f, 900.0f, 0.0f, Inclination::CENTER };
 	stageSegments.push_back(s);
 	s = { 0.0f, 0.0f, 800.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
@@ -402,6 +416,10 @@ update_status ModuleSceneStage::Update()
 			}
 		}
 	}
+
+	//Elements
+	App->renderer->Blit(startFlag, 0, 0, &leftStart); 
+
 
 	return UPDATE_CONTINUE;
 }
