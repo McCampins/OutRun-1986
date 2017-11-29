@@ -12,22 +12,19 @@
 #include "ModuleParticles.h"
 #include "ModuleSceneStage.h"
 
-#include "rapidxml.hpp"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/error/en.h"
 
-using namespace rapidxml;
+using namespace rapidjson;
 
 ModuleSceneStage::ModuleSceneStage(bool active) : Module(active)
 {
-	leftStart.x = 0;
-	leftStart.y = 0;
-	leftStart.w = 297;
-	leftStart.h = 80;
-
-	rightStart.x = 0;
-	rightStart.y = 150;
-	rightStart.w = 303;
-	rightStart.h = 74;
-
+	startFlagRect.x = 0;
+	startFlagRect.y = 100;
+	startFlagRect.w = 490;
+	startFlagRect.h = 75;
 }
 
 ModuleSceneStage::~ModuleSceneStage()
@@ -61,66 +58,82 @@ bool ModuleSceneStage::Start()
 		y--;
 	}
 
-	ifstream inFile("segments.config");
+	ifstream inFile("config//segments.config");
 
 	if (inFile.is_open() == false) {
 		LOG("File not opened --------------");
 		return false;
 	}
 
+	//Save file on string
+	string json((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
+	const char* str = json.c_str();
+
+
 	Segment s;
-	
-	/*
-	string a, b, c, d;
-	const char* str = nullptr;
-	float dX, dY, separation;
+
+	//JSON read values
+	int sep;
+	string jx, jy, inclination;
+
+	//Segment parameters
+	float dX = 0.0f;
+	float dY = 0.0f;
+	float separation = 0.0f;
 	Inclination inc;
 
-	xml_document<> doc;
-	xml_node<> * root_node; 
-	vector<char> buffer((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
-	buffer.push_back('\0');
-	doc.parse<0>(&buffer[0]);
-
-	root_node = doc.first_node("segment");
-	for (xml_node<> * segment_node = root_node->first_node("info"); segment_node; segment_node = segment_node->next_sibling())
-	{
-		a = segment_node->first_attribute("dX")->value();
-		b = segment_node->first_attribute("dY")->value();
-		c = segment_node->first_attribute("separation")->value();
-		d = segment_node->first_attribute("inclination")->value();
-		
+	//JSON Parser
+	Document document;
+	//document.Parse(str);
+	if (document.Parse(str).HasParseError()) {
+		string a = GetParseError_En(document.GetParseError());
 	}
-	*/
+	assert(document.IsObject());
+	assert(document.HasMember("segments"));
+	const Value& val = document["segments"];
+	assert(val.IsArray());
 
-	 /*
-	while (std::getline(inFile, json)) {
-		str = json.c_str();
-		d.Parse(str);
-		*/
-		/*
-		assert(document.HasMember("dX"));
-		assert(document["dX"].IsString());
-		a = document["dX"].GetString();
-		assert(document.HasMember("dY"));
-		assert(document["dY"].IsString());
-		b = document["dY"].GetString();
-		assert(document.HasMember("separation"));
-		assert(document["separation"].IsFloat());
-		separation = document["separation"].GetFloat();
-		assert(document.HasMember("inclination"));
-		assert(document["inclination"].IsString());
-		c = document["inclination"].GetString();
-		*/
+	for (SizeType i = 0; i < val.Size(); i++) {
+		assert(val[i].HasMember("dX"));
+		assert(val[i]["dX"].IsString());
+		jx = val[i]["dX"].GetString();
+		assert(val[i].HasMember("dY"));
+		assert(val[i]["dY"].IsString());
+		jy = val[i]["dY"].GetString();
+		assert(val[i].HasMember("separation"));
+		assert(val[i]["separation"].IsInt());
+		sep = val[i]["separation"].GetInt();
+		assert(val[i].HasMember("inclination"));
+		assert(val[i]["inclination"].IsString());
+		inclination = val[i]["inclination"].GetString();
+		
+		if (jx.compare("0") == 0) {
+			dX = 0.0f;
+		}
+		else if (jx.compare("SOFTLEFTCURVE") == 0) {
+			dX = SOFTLEFTCURVE;
+		}
+		else  if (jx.compare("SOFTRIGHTCURVE") == 0) {
+			dX = SOFTRIGHTCURVE;
+		}
+		else  if (jx.compare("HARDLEFTCURVE") == 0) {
+			dX = HARDLEFTCURVE;
+		}
+		else  if (jx.compare("HARDRIGHTCURVE") == 0) {
+			dX = HARDRIGHTCURVE;
+		}
+		else {
+			LOG("Error reading config file -----------");
+			return false;
+		}
 
-		/*
-		if (b.compare("0") == 0) {
+		if (jy.compare("0") == 0) {
 			dY = 0.0f;
 		}
-		else if (b.compare("UPHILL") == 0) {
+		else if (jy.compare("UPHILL") == 0) {
 			dY = UPHILL;
 		}
-		else  if (b.compare("DOWNHILL") == 0) {
+		else  if (jy.compare("DOWNHILL") == 0) {
 			dY = DOWNHILL;
 		}
 		else {
@@ -128,14 +141,16 @@ bool ModuleSceneStage::Start()
 			return false;
 		}
 
-		if (c.compare("Inclination::CENTER") == 0) {
+		separation = (float)sep;
+
+		if (inclination.compare("Inclination::CENTER") == 0) {
 			inc = Inclination::CENTER;
 		}
-		else if (c.compare("Inclination::DOWN") == 0)
+		else if (inclination.compare("Inclination::DOWN") == 0)
 		{
 			inc = Inclination::DOWN;
 		}
-		else if (c.compare("Inclination::UP") == 0)
+		else if (inclination.compare("Inclination::UP") == 0)
 		{
 			inc = Inclination::UP;
 		}
@@ -143,11 +158,18 @@ bool ModuleSceneStage::Start()
 			LOG("Error reading config file -----------");
 			return false;
 		}
-		s = { dX, dY, separation, 0.0f, inc };
-		*/
-	//}
+
+		if (i == 0) {
+			s = { dX, dY, separation, 0.0f, inc };
+		}
+		else {
+			s = { dX, dY, separation, (float)zMap.size(), inc };
+		}
+		stageSegments.push_back(s);
+	}
 
 	//STAGE 1
+	/*
 	s = { 0.0f, 0.0f, 900.0f, 0.0f, Inclination::CENTER };
 	stageSegments.push_back(s);
 	s = { 0.0f, 0.0f, 800.0f, (float)zMap.size(), Inclination::CENTER };
@@ -249,11 +271,12 @@ bool ModuleSceneStage::Start()
 	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
 	stageSegments.push_back(s);
 	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
-	stageSegments.push_back(s);
+	stageSegments.push_back(s); 
 	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
 	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
 	stageSegments.push_back(s);
+	*/
 	//END OF STAGE 1
 
 	bottomSegment = stageSegments.at(currentSegment);
@@ -418,7 +441,7 @@ update_status ModuleSceneStage::Update()
 	}
 
 	//Elements
-	App->renderer->Blit(startFlag, 0, 0, &leftStart); 
+	App->renderer->Blit(startFlag, -50 - (App->renderer->camera.x / SCREEN_SIZE), 35, &startFlagRect);
 
 
 	return UPDATE_CONTINUE;

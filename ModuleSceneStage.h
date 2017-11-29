@@ -67,8 +67,7 @@ public:
 	bool leftTireOut = false;
 	bool rigthTireOut = false;
 
-	SDL_Rect leftStart;
-	SDL_Rect rightStart;
+	SDL_Rect startFlagRect;
 };
 
 #endif // __MODULESCENESTAGE_H__

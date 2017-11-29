@@ -41,8 +41,8 @@ bool ModuleRender::Init()
 }
 
 update_status ModuleRender::PreUpdate()
-{
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+{	
+	SDL_SetRenderDrawColor(renderer, 0, 191, 255, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(renderer);
 	return UPDATE_CONTINUE;
 }
@@ -89,7 +89,7 @@ bool ModuleRender::CleanUp()
 }
 
 // Blit to screen
-bool ModuleRender::Blit(SDL_Texture* texture, int x, int y, SDL_Rect* section, float curveSpeed)
+bool ModuleRender::Blit(SDL_Texture* texture, int x, int y, SDL_Rect* section, float curveSpeed, float scale)
 {
 	bool ret = true;
 	SDL_Rect rect;
@@ -98,8 +98,8 @@ bool ModuleRender::Blit(SDL_Texture* texture, int x, int y, SDL_Rect* section, f
 
 	if (section != NULL)
 	{
-		rect.w = section->w;
-		rect.h = section->h;
+		rect.w = (int) ceil(section->w * scale);
+		rect.h = (int) ceil(section->h * scale);
 	}
 	else
 	{
