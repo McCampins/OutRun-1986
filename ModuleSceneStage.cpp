@@ -38,6 +38,8 @@ bool ModuleSceneStage::Start()
 
 	startFlag = App->textures->Load("rtype/startflag.png");
 
+
+
 	//background = App->textures->Load("rtype/background.png");
 
 	App->player->Enable();
@@ -58,17 +60,16 @@ bool ModuleSceneStage::Start()
 		y--;
 	}
 
-	ifstream inFile("config//segments.config");
+	ifstream inSegment("config//segments.config");
 
-	if (inFile.is_open() == false) {
+	if (inSegment.is_open() == false) {
 		LOG("File not opened --------------");
 		return false;
 	}
 
 	//Save file on string
-	string json((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
-	const char* str = json.c_str();
-
+	string jsonElem((std::istreambuf_iterator<char>(inSegment)), std::istreambuf_iterator<char>());
+	const char* str = jsonElem.c_str();
 
 	Segment s;
 
@@ -84,9 +85,10 @@ bool ModuleSceneStage::Start()
 
 	//JSON Parser
 	Document document;
-	//document.Parse(str);
 	if (document.Parse(str).HasParseError()) {
-		string a = GetParseError_En(document.GetParseError());
+		const char* err = GetParseError_En(document.GetParseError());
+		LOG(err);
+		return false;
 	}
 	assert(document.IsObject());
 	assert(document.HasMember("segments"));
@@ -167,6 +169,31 @@ bool ModuleSceneStage::Start()
 		}
 		stageSegments.push_back(s);
 	}
+
+	ifstream inVisual("config//visualelements.config");
+
+	if (inVisual.is_open() == false) {
+		LOG("File not opened --------------");
+		return false;
+	}
+
+	//Save file on string
+	string jsonVisual((std::istreambuf_iterator<char>(inVisual)), std::istreambuf_iterator<char>());
+	str = jsonVisual.c_str();
+
+	VisualElement v;
+
+	int x, y, world;
+
+	if (document.Parse(str).HasParseError()) {
+		const char* err = GetParseError_En(document.GetParseError());
+		LOG(err);
+		return false;
+	}
+	assert(document.IsObject());
+	assert(document.HasMember("elements"));
+	const Value& val = document["elements"];
+	assert(val.IsArray());
 
 	//STAGE 1
 	/*
@@ -305,6 +332,8 @@ bool ModuleSceneStage::CleanUp()
 // Update: draw background
 update_status ModuleSceneStage::Update()
 {
+	bool drawn = false;
+
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
 	int y = SCREEN_HEIGHT * SCREEN_SIZE;
@@ -395,6 +424,11 @@ update_status ModuleSceneStage::Update()
 			leftTireOut = CheckLeftTire(x, scaleFactor, roadSeparation);
 			rigthTireOut = CheckRightTire(x, scaleFactor, roadSeparation);
 		}
+
+		if (ceil(worldPosition) == 8 && !drawn) {
+			App->renderer->Blit(startFlag, -50 - ((App->renderer->camera.x / SCREEN_SIZE) * scaleFactor), 35 * (2 - scaleFactor), &startFlagRect, 1.0f, scaleFactor);
+			drawn = true;
+		}
 	}
 
 	//Update segments
@@ -439,9 +473,6 @@ update_status ModuleSceneStage::Update()
 			}
 		}
 	}
-
-	//Elements
-	App->renderer->Blit(startFlag, -50 - (App->renderer->camera.x / SCREEN_SIZE), 35, &startFlagRect);
 
 
 	return UPDATE_CONTINUE;

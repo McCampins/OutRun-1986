@@ -38,7 +38,16 @@ struct Segment {
 	Segment(float dX, float dY, float roadSeparation, float yMap, Inclination inc) : dX(dX), dY(dY), roadSeparation(roadSeparation), yMapPosition(yMap), inc(inc) {};
 };
 
+struct VisualElement {
+	SDL_Texture* texture;
+	int x;
+	int y;
+	SDL_Rect section;
+	int worldPosition;
 
+	VisualElement() {};
+	VisualElement(SDL_Texture* texture, int x, int y, SDL_Rect section, int worldPosition) : texture(texture), x(x), y(y), section(section), worldPosition(worldPosition) {};
+};
 
 class ModuleSceneStage : public Module
 {
@@ -68,6 +77,10 @@ public:
 	bool rigthTireOut = false;
 
 	SDL_Rect startFlagRect;
+
+	std::vector<SDL_Texture*> textures;
+	std::vector<SDL_Rect> texturesRects;
+	std::vector<VisualElement> elementsInfo;
 };
 
 #endif // __MODULESCENESTAGE_H__
