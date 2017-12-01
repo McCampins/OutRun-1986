@@ -38,8 +38,6 @@ bool ModuleSceneStage::Start()
 
 	startFlag = App->textures->Load("rtype/startflag.png");
 
-
-
 	//background = App->textures->Load("rtype/background.png");
 
 	App->player->Enable();
@@ -183,7 +181,7 @@ bool ModuleSceneStage::Start()
 
 	VisualElement v;
 
-	int x, y, world;
+	int elemX, elemY, world;
 
 	if (document.Parse(str).HasParseError()) {
 		const char* err = GetParseError_En(document.GetParseError());
@@ -192,9 +190,83 @@ bool ModuleSceneStage::Start()
 	}
 	assert(document.IsObject());
 	assert(document.HasMember("elements"));
-	const Value& val = document["elements"];
-	assert(val.IsArray());
+	const Value& valElem = document["elements"];
+	assert(valElem.IsArray());
 
+	for (SizeType i = 0; i < val.Size(); i++) {
+		assert(val[i].HasMember("dX"));
+		assert(val[i]["dX"].IsString());
+		jx = val[i]["dX"].GetString();
+		assert(val[i].HasMember("dY"));
+		assert(val[i]["dY"].IsString());
+		jy = val[i]["dY"].GetString();
+		assert(val[i].HasMember("separation"));
+		assert(val[i]["separation"].IsInt());
+		sep = val[i]["separation"].GetInt();
+		assert(val[i].HasMember("inclination"));
+		assert(val[i]["inclination"].IsString());
+		inclination = val[i]["inclination"].GetString();
+
+		if (jx.compare("0") == 0) {
+			dX = 0.0f;
+		}
+		else if (jx.compare("SOFTLEFTCURVE") == 0) {
+			dX = SOFTLEFTCURVE;
+		}
+		else  if (jx.compare("SOFTRIGHTCURVE") == 0) {
+			dX = SOFTRIGHTCURVE;
+		}
+		else  if (jx.compare("HARDLEFTCURVE") == 0) {
+			dX = HARDLEFTCURVE;
+		}
+		else  if (jx.compare("HARDRIGHTCURVE") == 0) {
+			dX = HARDRIGHTCURVE;
+		}
+		else {
+			LOG("Error reading config file -----------");
+			return false;
+		}
+
+		if (jy.compare("0") == 0) {
+			dY = 0.0f;
+		}
+		else if (jy.compare("UPHILL") == 0) {
+			dY = UPHILL;
+		}
+		else  if (jy.compare("DOWNHILL") == 0) {
+			dY = DOWNHILL;
+		}
+		else {
+			LOG("Error reading config file -----------");
+			return false;
+		}
+
+		separation = (float)sep;
+
+		if (inclination.compare("Inclination::CENTER") == 0) {
+			inc = Inclination::CENTER;
+		}
+		else if (inclination.compare("Inclination::DOWN") == 0)
+		{
+			inc = Inclination::DOWN;
+		}
+		else if (inclination.compare("Inclination::UP") == 0)
+		{
+			inc = Inclination::UP;
+		}
+		else {
+			LOG("Error reading config file -----------");
+			return false;
+		}
+
+		if (i == 0) {
+			s = { dX, dY, separation, 0.0f, inc };
+		}
+		else {
+			s = { dX, dY, separation, (float)zMap.size(), inc };
+		}
+		stageSegments.push_back(s);
+	}
 	//STAGE 1
 	/*
 	s = { 0.0f, 0.0f, 900.0f, 0.0f, Inclination::CENTER };
