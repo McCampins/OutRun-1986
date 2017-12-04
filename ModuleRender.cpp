@@ -51,7 +51,7 @@ update_status ModuleRender::PreUpdate()
 update_status ModuleRender::Update()
 {
 	// debug camera
-	int curveSpeed = 1;
+	int curveSpeed = 3;
 
 	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
 		App->renderer->camera.y += curveSpeed;
@@ -171,7 +171,7 @@ bool ModuleRender::DrawHorizontalLine(float x, int y, float w, Uint8 r, Uint8 g,
 
 	if (SDL_RenderDrawLine(renderer, static_cast<int>(x - (w / 2)), y, static_cast<int>(x + (w / 2)), y) != 0)
 	{
-		LOG("Cannot draw quad to screen. SDL_RenderDrawLine error: %s", SDL_GetError());
+		LOG("Cannot draw line to screen. SDL_RenderDrawLine error: %s", SDL_GetError());
 		ret = false;
 	}
 

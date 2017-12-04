@@ -1,13 +1,13 @@
 #ifndef __MODULESCENESTAGE_H__
 #define __MODULESCENESTAGE_H__
 
-#define roadHeightWorld -200
-#define roadHeightScreen 200
+#define ROADHEIGHTWORLD -200
+#define ROADHEIGHTSCREEN 200
 
-#define roadWidth 450
-#define rumbleWidth 50
-#define lineWidth 24
-#define terrainWidth 6000
+#define ROADWIDTH 450
+#define RUMBLEWIDTH 50
+#define LINEWIDTH 24
+#define TERRAINWIDTH 6000
 
 #define SOFTLEFTCURVE -0.01f
 #define SOFTRIGHTCURVE 0.01f
@@ -16,7 +16,10 @@
 #define UPHILL 1.0f
 #define DOWNHILL -1.0f
 
+#define VISUALELEMENTDISTANCE 2.0f
+
 #include <cmath>
+#include <unordered_map>
 #include "Module.h"
 
 struct SDL_Texture;
@@ -25,6 +28,16 @@ enum class Inclination {
 	UP,
 	CENTER,
 	DOWN
+};
+
+enum class VisualElementPosition {
+	LEFT,
+	CENTER,
+	RIGHT,
+	LEFTANDRIGHT,
+	LEFTANDCENTER,
+	CENTERANDRIGHT,
+	ALL
 };
 
 struct Segment {
@@ -40,13 +53,16 @@ struct Segment {
 
 struct VisualElement {
 	SDL_Texture* texture;
+	SDL_Rect rect;
 	int x;
 	int y;
-	SDL_Rect section;
 	int worldPosition;
+	int nConsecutiveElements; 
+	VisualElementPosition position;
 
 	VisualElement() {};
-	VisualElement(SDL_Texture* texture, int x, int y, SDL_Rect section, int worldPosition) : texture(texture), x(x), y(y), section(section), worldPosition(worldPosition) {};
+	VisualElement(SDL_Texture* texture, SDL_Rect rect, int x, int y, int worldPosition, int nConsecutiveElements, VisualElementPosition position) : 
+		texture(texture), rect(rect), x(x), y(y),	worldPosition(worldPosition), nConsecutiveElements(nConsecutiveElements), position(position) {};
 };
 
 class ModuleSceneStage : public Module
@@ -75,12 +91,8 @@ public:
 	int curveCameraMove = 0;
 	bool leftTireOut = false;
 	bool rigthTireOut = false;
-
-	SDL_Rect startFlagRect;
-
-	std::vector<SDL_Texture*> textures;
-	std::vector<SDL_Rect> texturesRects;
-	std::vector<VisualElement> elementsInfo;
+	std::unordered_map<const char*, std::pair<SDL_Texture*, SDL_Rect>> textures;
+	std::vector<VisualElement> elements;
 };
 
 #endif // __MODULESCENESTAGE_H__
