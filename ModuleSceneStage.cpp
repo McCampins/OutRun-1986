@@ -176,7 +176,8 @@ bool ModuleSceneStage::Start()
 	VisualElement v;
 
 	const char* texPath;
-	int elemX, elemY, world, nConsElem;
+	int elemX, elemY, nConsElem;
+	float world;
 	string pos;
 	VisualElementPosition vpos;
 	unordered_map<const char*, pair<SDL_Texture*, SDL_Rect>>::const_iterator it;
@@ -224,8 +225,8 @@ bool ModuleSceneStage::Start()
 		assert(valElem[i]["y"].IsInt());
 		elemY = valElem[i]["y"].GetInt();
 		assert(valElem[i].HasMember("worldPosition"));
-		assert(valElem[i]["worldPosition"].IsInt());
-		world = valElem[i]["worldPosition"].GetInt();
+		assert(valElem[i]["worldPosition"].IsFloat());
+		world = valElem[i]["worldPosition"].GetFloat();
 		assert(valElem[i].HasMember("nConsecutiveElements"));
 		assert(valElem[i]["nConsecutiveElements"].IsInt());
 		nConsElem = valElem[i]["nConsecutiveElements"].GetInt();
@@ -431,6 +432,7 @@ update_status ModuleSceneStage::Update()
 	}
 
 	//Draw lines
+	std::vector<int> screenYPerWorldPosition;
 	for (unsigned int i = 0; i < zMap.size(); i++) {
 		z = zMap.at(i);
 
@@ -451,7 +453,7 @@ update_status ModuleSceneStage::Update()
 		roadSeparation = initialRoadSeparation - (separationInterval * -(-1 + segmentFactor));
 
 		worldPosition = (z * 10) + App->player->position;
-
+		
 		//Check if uphill, downhill or no hill
 		if (dY < 0) {
 			float percentage = 0.0f;
@@ -497,27 +499,28 @@ update_status ModuleSceneStage::Update()
 			leftTireOut = CheckLeftTire(x, scaleFactor, roadSeparation);
 			rigthTireOut = CheckRightTire(x, scaleFactor, roadSeparation);
 		}
+		screenYPerWorldPosition.push_back(screenY);
 	}
 
 	std::vector<VisualElement> elementsToDraw;
 	z = zMap.at(zMap.size() - 1);
-	int maxPosition = int((z * 10) + App->player->position);
+	float maxPosition = (z * 10) + App->player->position;
 	VisualElement vElem;
 	unsigned int n = 0;
 	vElem = elements.at(n);
-	while (vElem.worldPosition <= ceil(maxPosition)) {
+	while (int(vElem.worldPosition * 10) <= int(maxPosition * 10)) {
 		elementsToDraw.push_back(vElem);
 		if (vElem.nConsecutiveElements > 0) {
 			bool insideRange = true;
 			for (int i = 1; i <= vElem.nConsecutiveElements && insideRange == true; i++) {
-				vElem.worldPosition += i;
-				if (vElem.worldPosition <= ceil(maxPosition)) {
+				vElem.worldPosition += (float) i;
+				if (int((vElem.worldPosition * 10)) <= int((maxPosition * 10))) {
 					elementsToDraw.push_back(vElem);
 				}
 				else {
 					insideRange = false;
 				}
-				vElem.worldPosition -= i;
+				vElem.worldPosition -= (float) i;
 			}
 		}
 		n++;
@@ -530,48 +533,53 @@ update_status ModuleSceneStage::Update()
 	for (std::vector<bool>::iterator it = elementDrawn.begin(); it != elementDrawn.end(); ++it)
 		*it = false;
 
+	int screen;
 	for (int i = zMap.size() - 1; i >= 0; i--) {
 		z = zMap.at(i);
 		scaleFactor = factorMap.at(i);
 		worldPosition = (z * 10) + App->player->position;
 		roadSeparation = initialRoadSeparation - (separationInterval * -(-1 + segmentFactor));
+		screen = screenYPerWorldPosition.at(i);
 
 		n = 0;
 		vElem = elementsToDraw.at(n);
-		while (vElem.worldPosition <= ceil(worldPosition)) {
-			if (ceil(worldPosition) == vElem.worldPosition && elementDrawn.at(n) == false) {
+		while (int(vElem.worldPosition * 10) <= int(worldPosition * 10)) {
+			if (int(worldPosition * 10) == int(vElem.worldPosition * 10) && elementDrawn.at(n) == false) {
 				SDL_Rect rect;
+				int a = int((vElem.x * scaleFactor) + 25);
+				int b = int(vElem.y + (vElem.rect.h - (ceil(vElem.rect.h * scaleFactor)) + 50 * scaleFactor));
 				switch (vElem.position) {
 				case VisualElementPosition::LEFT:
-					App->renderer->Blit(vElem.texture, int(vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 1.0f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int(vElem.x + (SCREEN_WIDTH * (1 - scaleFactor) / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
 					break;
 				case VisualElementPosition::CENTER:
 					rect = vElem.rect;
 					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(SCREEN_WIDTH * scaleFactor / 2), int(vElem.y * (2 - scaleFactor)), &(rect), 1.0f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int(SCREEN_WIDTH * scaleFactor / 2), int(vElem.y * (2 - scaleFactor)), &(rect), 0.5f, scaleFactor);
 					break;
 				case VisualElementPosition::RIGHT:
 					rect = vElem.rect;
 					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 1.0f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
 					break;
 				case VisualElementPosition::LEFTANDCENTER:
-					App->renderer->Blit(vElem.texture, int(vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 1.0f, scaleFactor);
+					//App->renderer->Blit(vElem.texture, int((vElem.x * scaleFactor) - ((1 - scaleFactor) * 75)), int(vElem.y + (vElem.rect.h - (ceil(vElem.rect.h * scaleFactor)) + 85 * scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int((vElem.x * scaleFactor) - ((1 - scaleFactor) * 75)), (screen / SCREEN_SIZE) - (vElem.rect.h * scaleFactor), &(vElem.rect), 0.5f, scaleFactor);
 					rect = vElem.rect;
 					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(SCREEN_WIDTH * scaleFactor / 2), int(vElem.y * (2 - scaleFactor)), &(rect), 1.0f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int((SCREEN_WIDTH / 2) + App->renderer->camera.x * scaleFactor), int(vElem.y * (2 - scaleFactor)), &(rect), 0.5f, scaleFactor);
 					break;
 				case VisualElementPosition::LEFTANDRIGHT:
-					App->renderer->Blit(vElem.texture, int(vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 1.0f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int(vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
 					rect = vElem.rect;
 					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 1.0f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
 					break;
 				case VisualElementPosition::CENTERANDRIGHT:
 					rect = vElem.rect;
 					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(SCREEN_WIDTH * scaleFactor / 2), int(vElem.y * (2 - scaleFactor)), &(rect), 1.0f, scaleFactor);
-					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 1.0f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int(SCREEN_WIDTH * scaleFactor / 2), int(vElem.y * (2 - scaleFactor)), &(rect), 0.5f, scaleFactor);
+					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
 					break;
 				case VisualElementPosition::ALL:
 					break;
