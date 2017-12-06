@@ -58,13 +58,35 @@ struct VisualElement {
 	int x;
 	int y;
 	bool overHorizon;
-	float worldPosition;
-	int nConsecutiveElements; 
+	int nConsecutiveElements;
+	float worldPosition; 
 	VisualElementPosition position;
 
 	VisualElement() {};
-	VisualElement(SDL_Texture* texture, SDL_Rect rect, Animation anim, int x, int y, bool overHorizon, float worldPosition, int nConsecutiveElements, VisualElementPosition position) :
-		texture(texture), rect(rect), anim(anim), x(x), y(y), overHorizon(overHorizon), worldPosition(worldPosition), nConsecutiveElements(nConsecutiveElements), position(position) {};
+	VisualElement(SDL_Texture* texture, SDL_Rect rect, Animation anim, int x, int y, bool overHorizon, int nConsecutiveElements, float worldPosition, VisualElementPosition position) :
+		texture(texture), rect(rect), anim(anim), x(x), y(y), overHorizon(overHorizon), nConsecutiveElements(nConsecutiveElements), worldPosition(worldPosition), position(position) {};
+
+	bool CopyOf(VisualElement ve) {
+		if (rect.x != ve.rect.x || rect.y != ve.rect.y || rect.w != ve.rect.w || rect.h != ve.rect.h)
+			return false;
+
+		if (x != ve.x)
+			return false;
+
+		if (y != ve.y)
+			return false;
+
+		if (overHorizon != ve.overHorizon)
+			return false;
+
+		if (nConsecutiveElements != ve.nConsecutiveElements)
+			return false;
+
+		if (position != ve.position)
+			return false;
+
+		return true;
+	}
 };
 
 class ModuleSceneStage : public Module

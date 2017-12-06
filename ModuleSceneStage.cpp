@@ -184,7 +184,6 @@ bool ModuleSceneStage::Start()
 	std::unordered_map<std::string, SDL_Texture*>::iterator it;
 	SDL_Texture* tex = nullptr;
 	SDL_Rect r;
-	Animation anim;
 
 	Document docVisual;
 	if (docVisual.Parse(str).HasParseError()) {
@@ -213,6 +212,7 @@ bool ModuleSceneStage::Start()
 		assert(valElem[i].HasMember("rect"));
 		assert(valElem[i]["rect"].IsArray());
 		const Value& arrRect = valElem[i]["rect"];
+		Animation anim;
 		if (arrRect.Size() > 1) {
 			for (rapidjson::SizeType i = 0; i < arrRect.Size(); i++)
 			{
@@ -223,7 +223,7 @@ bool ModuleSceneStage::Start()
 				}
 				anim.frames.push_back({ animationFrame[0].GetInt(), animationFrame[1].GetInt(), animationFrame[2].GetInt(), animationFrame[3].GetInt() });
 			}
-			anim.speed = 2.0f;
+			anim.speed = 0.1f;
 		}
 		else {
 			const rapidjson::Value& rectInfor = arrRect[0];
@@ -290,7 +290,7 @@ bool ModuleSceneStage::Start()
 			return false;
 		}
 
-		v = { tex, r, anim, elemX, elemY, horizon, world, nConsElem, vpos };
+		v = { tex, r, anim, elemX, elemY, horizon, nConsElem, world, vpos };
 		elements.push_back(v);
 	}
 
@@ -353,14 +353,12 @@ update_status ModuleSceneStage::Update()
 	z = zMap.at(zMap.size() - 1);
 	float maxPosition = (z * 10) + App->player->position;
 	VisualElement vElem;
+
 	unsigned int n = 0;
 	vElem = elements.at(n);
 
 	while (int(vElem.worldPosition * 10) <= int(maxPosition * 10)) {
 		if (int(minPosition * 10) <= int((vElem.worldPosition + vElem.nConsecutiveElements) * 10)) {
-			if (vElem.worldPosition == 56.0f) {
-				int a = 0;
-			}
 			elementsToDraw.push_back(vElem);
 			if (vElem.nConsecutiveElements > 0) {
 				bool insideRange = true;
@@ -478,7 +476,12 @@ update_status ModuleSceneStage::Update()
 					case VisualElementPosition::LEFT:
 						if (vElem.overHorizon == true) {
 							if (vElem.anim.frames.size() > 0) {
-								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+								for (std::vector<VisualElement>::iterator it = elements.begin(); it != elements.end(); ++it) {
+									VisualElement* aux = &(*it);
+									if (vElem.CopyOf(*it)) {
+										App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+									}
+								}
 							}
 							else {
 								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
@@ -486,7 +489,12 @@ update_status ModuleSceneStage::Update()
 						}
 						else {
 							if (vElem.anim.frames.size() > 0) {
-								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+								for (std::vector<VisualElement>::iterator it = elements.begin(); it != elements.end(); ++it) {
+									VisualElement* aux = &(*it);
+									if (vElem.CopyOf(*it)) {
+										App->renderer->Blit(aux->texture, int((width + (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+									}
+								}
 							}
 							else {
 								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
@@ -496,7 +504,12 @@ update_status ModuleSceneStage::Update()
 					case VisualElementPosition::CENTER:
 						if (vElem.overHorizon == true) {
 							if (vElem.anim.frames.size() > 0) {
-
+								for (std::vector<VisualElement>::iterator it = elements.begin(); it != elements.end(); ++it) {
+									VisualElement* aux = &(*it);
+									if (vElem.CopyOf(*it)) {
+										App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->rect), scaleFactor, scaleFactor);
+									}
+								}
 							}
 							else {
 								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
