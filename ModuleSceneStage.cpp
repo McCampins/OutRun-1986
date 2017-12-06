@@ -223,7 +223,7 @@ bool ModuleSceneStage::Start()
 				}
 				anim.frames.push_back({ animationFrame[0].GetInt(), animationFrame[1].GetInt(), animationFrame[2].GetInt(), animationFrame[3].GetInt() });
 			}
-			anim.speed = 0.1f;
+			anim.speed = 0.2f;
 		}
 		else {
 			const rapidjson::Value& rectInfor = arrRect[0];
@@ -320,8 +320,7 @@ update_status ModuleSceneStage::Update()
 {
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
-	int y = SCREEN_HEIGHT * SCREEN_SIZE;
-	int screenY = y;
+	int screenY = SCREEN_HEIGHT * SCREEN_SIZE;
 	float scaleFactor;
 	float z;
 
