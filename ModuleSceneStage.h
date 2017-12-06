@@ -54,6 +54,7 @@ struct Segment {
 struct VisualElement {
 	SDL_Texture* texture;
 	SDL_Rect rect;
+	Animation anim;
 	int x;
 	int y;
 	bool overHorizon;
@@ -62,8 +63,8 @@ struct VisualElement {
 	VisualElementPosition position;
 
 	VisualElement() {};
-	VisualElement(SDL_Texture* texture, SDL_Rect rect, int x, int y, bool overHorizon, float worldPosition, int nConsecutiveElements, VisualElementPosition position) :
-		texture(texture), rect(rect), x(x), y(y), overHorizon(overHorizon), worldPosition(worldPosition), nConsecutiveElements(nConsecutiveElements), position(position) {};
+	VisualElement(SDL_Texture* texture, SDL_Rect rect, Animation anim, int x, int y, bool overHorizon, float worldPosition, int nConsecutiveElements, VisualElementPosition position) :
+		texture(texture), rect(rect), anim(anim), x(x), y(y), overHorizon(overHorizon), worldPosition(worldPosition), nConsecutiveElements(nConsecutiveElements), position(position) {};
 };
 
 class ModuleSceneStage : public Module
@@ -92,7 +93,7 @@ public:
 	int curveCameraMove = 0;
 	bool leftTireOut = false;
 	bool rigthTireOut = false;
-	std::unordered_map<const char*, std::pair<SDL_Texture*, SDL_Rect>> textures;
+	std::unordered_map<std::string, SDL_Texture*> textures;
 	std::vector<VisualElement> elements;
 };
 

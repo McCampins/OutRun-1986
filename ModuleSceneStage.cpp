@@ -181,9 +181,10 @@ bool ModuleSceneStage::Start()
 	bool horizon;
 	string pos;
 	VisualElementPosition vpos;
-	unordered_map<const char*, pair<SDL_Texture*, SDL_Rect>>::const_iterator it;
+	std::unordered_map<std::string, SDL_Texture*>::iterator it;
 	SDL_Texture* tex = nullptr;
 	SDL_Rect r;
+	Animation anim;
 
 	Document docVisual;
 	if (docVisual.Parse(str).HasParseError()) {
@@ -201,23 +202,36 @@ bool ModuleSceneStage::Start()
 		assert(valElem[i]["texture"].IsString());
 		texPath = valElem[i]["texture"].GetString();
 		it = textures.find(texPath);
-		if (it == textures.cend()) {
+		if (it == textures.end()) {
 			tex = App->textures->Load(texPath);
-			assert(valElem[i].HasMember("rect"));
-			assert(valElem[i]["rect"].IsArray());
-			const Value& arrRect = valElem[i]["rect"];
-			if (arrRect.Size() != 4) {
-				LOG("Error reading config file. Check rect array parameters-----------");
-				return false;
-			}
-			r = { arrRect[0].GetInt(), arrRect[1].GetInt(), arrRect[2].GetInt(), arrRect[3].GetInt() };
-			std::pair<SDL_Texture*, SDL_Rect> sdlPair(tex, r);
-			std::pair<const char*, pair<SDL_Texture*, SDL_Rect>> pair(texPath, sdlPair);
+			std::pair<const char*, SDL_Texture*> pair(texPath, tex);
 			textures.insert(pair);
 		}
 		else {
-			tex = it->second.first;
-			r = it->second.second;
+			tex = it->second;
+		}
+		assert(valElem[i].HasMember("rect"));
+		assert(valElem[i]["rect"].IsArray());
+		const Value& arrRect = valElem[i]["rect"];
+		if (arrRect.Size() > 1) {
+			for (rapidjson::SizeType i = 0; i < arrRect.Size(); i++)
+			{
+				const rapidjson::Value& animationFrame = arrRect[i];
+				if (animationFrame.Size() != 4) {
+					LOG("Error reading config file. Check rect array parameters-----------");
+					return false;
+				}
+				anim.frames.push_back({ animationFrame[0].GetInt(), animationFrame[1].GetInt(), animationFrame[2].GetInt(), animationFrame[3].GetInt() });
+			}
+			anim.speed = 2.0f;
+		}
+		else {
+			const rapidjson::Value& rectInfor = arrRect[0];
+			if (rectInfor.Size() != 4) {
+				LOG("Error reading config file. Check rect array parameters-----------");
+				return false;
+			}
+			r = { rectInfor[0].GetInt(), rectInfor[1].GetInt(), rectInfor[2].GetInt(), rectInfor[3].GetInt() };
 		}
 		assert(valElem[i].HasMember("x"));
 		assert(valElem[i]["x"].IsInt());
@@ -276,7 +290,7 @@ bool ModuleSceneStage::Start()
 			return false;
 		}
 
-		v = { tex, r, elemX, elemY, horizon, world, nConsElem, vpos };
+		v = { tex, r, anim, elemX, elemY, horizon, world, nConsElem, vpos };
 		elements.push_back(v);
 	}
 
@@ -344,6 +358,9 @@ update_status ModuleSceneStage::Update()
 
 	while (int(vElem.worldPosition * 10) <= int(maxPosition * 10)) {
 		if (int(minPosition * 10) <= int((vElem.worldPosition + vElem.nConsecutiveElements) * 10)) {
+			if (vElem.worldPosition == 56.0f) {
+				int a = 0;
+			}
 			elementsToDraw.push_back(vElem);
 			if (vElem.nConsecutiveElements > 0) {
 				bool insideRange = true;
@@ -452,71 +469,137 @@ update_status ModuleSceneStage::Update()
 		width = screenXPerWorldPosition.at(i);
 
 		n = 0;
-		vElem = elementsToDraw.at(n);
-		while (n < elementsToDraw.size()) {
-			if (int(worldPosition * 10) == int(vElem.worldPosition * 10) && elementDrawn.at(n) == false) {
-				SDL_Rect rect;
-				switch (vElem.position) {
-				case VisualElementPosition::LEFT:
-					if (vElem.overHorizon == true) {
-						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-					}
-					else {
-						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-					}
-					break;
-				case VisualElementPosition::CENTER:
-					rect = vElem.rect;
-					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(SCREEN_WIDTH * scaleFactor / 2), int(vElem.y * (2 - scaleFactor)), &(rect), 0.5f, scaleFactor);
-					break;
-				case VisualElementPosition::RIGHT:
-					rect = vElem.rect;
-					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
-					break;
-				case VisualElementPosition::LEFTANDCENTER:
-					if (vElem.overHorizon == true) {
-						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-					}
-					else {
-						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-					}
-					rect = vElem.rect;
-					rect.x += rect.w;
-					if (vElem.overHorizon == true) {
-						App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
-					}
-					else {
-						App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
-					}
-					break;
-				case VisualElementPosition::LEFTANDRIGHT:
-					if (vElem.overHorizon == true) {
-						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-					}
-					else {
-						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-					}
-					rect = vElem.rect;
-					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
-					break;
-				case VisualElementPosition::CENTERANDRIGHT:
-					rect = vElem.rect;
-					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(SCREEN_WIDTH * scaleFactor / 2), int(vElem.y * (2 - scaleFactor)), &(rect), 0.5f, scaleFactor);
-					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
-					break;
-				case VisualElementPosition::ALL:
-					break;
-				}
-				elementDrawn.at(n) = true;
-			}
-			n++;
-			if (n > elementsToDraw.size() - 1)
-				break;
+		if (elementsToDraw.size() > 0) {
 			vElem = elementsToDraw.at(n);
+			while (n < elementsToDraw.size()) {
+				if (int(worldPosition * 10) == int(vElem.worldPosition * 10) && elementDrawn.at(n) == false) {
+					SDL_Rect rect;
+					switch (vElem.position) {
+					case VisualElementPosition::LEFT:
+						if (vElem.overHorizon == true) {
+							if (vElem.anim.frames.size() > 0) {
+								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+							}
+						}
+						else {
+							if (vElem.anim.frames.size() > 0) {
+								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+							}
+						}
+						break;
+					case VisualElementPosition::CENTER:
+						if (vElem.overHorizon == true) {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+							}
+						}
+						else {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+							}
+						}
+						break;
+					case VisualElementPosition::RIGHT:
+						rect = vElem.rect;
+						rect.x += rect.w;
+						App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+						break;
+					case VisualElementPosition::LEFTANDCENTER:
+						if (vElem.overHorizon == true) {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+							}
+						}
+						else {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+							}
+						}
+						rect = vElem.rect;
+						rect.x += rect.w;
+						if (vElem.overHorizon == true) {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+							}
+						}
+						else {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+							}
+						}
+						break;
+					case VisualElementPosition::LEFTANDRIGHT:
+						if (vElem.overHorizon == true) {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+							}
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+
+						}
+						rect = vElem.rect;
+						rect.x += rect.w;
+						App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+						break;
+					case VisualElementPosition::CENTERANDRIGHT:
+						rect = vElem.rect;
+						rect.x += rect.w;
+						if (vElem.overHorizon == true) {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int(width / (SCREEN_SIZE * SCREEN_SIZE)), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+							}
+						}
+						else {
+							if (vElem.anim.frames.size() > 0) {
+
+							}
+							else {
+								App->renderer->Blit(vElem.texture, int((width + (roadSeparation * scaleFactor / 2)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+							}
+						}
+						App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+						break;
+					case VisualElementPosition::ALL:
+						break;
+					}
+					elementDrawn.at(n) = true;
+				}
+				n++;
+				if (n > elementsToDraw.size() - 1)
+					break;
+				vElem = elementsToDraw.at(n);
+			}
 		}
 	}
 
@@ -540,7 +623,10 @@ update_status ModuleSceneStage::Update()
 	if (App->player->playerSpeed != 0.0f) {
 		if (bottomSegment.dX > 0.0f) {
 			float normalize = App->player->playerSpeed / MAX_SPEED;
-			if (normalize < 0.33f) {
+			if (normalize < 0.2f) {
+				curveCameraMove = 0;
+			}
+			else if (normalize < 0.33f) {
 				curveCameraMove = 3;
 			}
 			else if (normalize < 0.66f) {
@@ -552,7 +638,10 @@ update_status ModuleSceneStage::Update()
 		}
 		else if (bottomSegment.dX < 0.0f) {
 			float normalize = App->player->playerSpeed / MAX_SPEED;
-			if (normalize < 0.33f) {
+			if (normalize < 0.2f) {
+				curveCameraMove = 0;
+			}
+			else if (normalize < 0.33f) {
 				curveCameraMove = -3;
 			}
 			else if (normalize < 0.66f) {
