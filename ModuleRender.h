@@ -28,6 +28,7 @@ public:
 public:
 	SDL_Renderer* renderer = nullptr;
 	SDL_Rect camera;
+	int initCameraX = 710;
 };
 
 #endif // __MODULERENDER_H__

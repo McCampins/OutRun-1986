@@ -37,6 +37,8 @@ bool ModuleRender::Init()
 		ret = false;
 	}
 
+	camera.x = initCameraX;
+
 	return ret;
 }
 

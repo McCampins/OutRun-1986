@@ -176,8 +176,9 @@ bool ModuleSceneStage::Start()
 	VisualElement v;
 
 	const char* texPath;
-	int elemX, elemY, nConsElem;
+	int elemX, elemY, overHorizon, nConsElem;
 	float world;
+	bool horizon;
 	string pos;
 	VisualElementPosition vpos;
 	unordered_map<const char*, pair<SDL_Texture*, SDL_Rect>>::const_iterator it;
@@ -224,6 +225,21 @@ bool ModuleSceneStage::Start()
 		assert(valElem[i].HasMember("y"));
 		assert(valElem[i]["y"].IsInt());
 		elemY = valElem[i]["y"].GetInt();
+		assert(valElem[i].HasMember("overHorizon"));
+		assert(valElem[i]["overHorizon"].IsInt());
+		overHorizon = valElem[i]["overHorizon"].GetInt();
+		switch (overHorizon)
+		{
+		case 0:
+			horizon = false;
+			break;
+		case 1:
+			horizon = true;
+			break;
+		default:
+			LOG("Error reading config file -----------");
+			return false;
+		}
 		assert(valElem[i].HasMember("worldPosition"));
 		assert(valElem[i]["worldPosition"].IsFloat());
 		world = valElem[i]["worldPosition"].GetFloat();
@@ -260,126 +276,14 @@ bool ModuleSceneStage::Start()
 			return false;
 		}
 
-		v = { tex, r, elemX, elemY, world, nConsElem, vpos };
+		v = { tex, r, elemX, elemY, horizon, world, nConsElem, vpos };
 		elements.push_back(v);
 	}
-	//STAGE 1
-	/*
-	s = { 0.0f, 0.0f, 900.0f, 0.0f, Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 800.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, UPHILL, 800.0f, (float)zMap.size(), Inclination::UP };
-	stageSegments.push_back(s);
-	s = { 0.0f, DOWNHILL, 400.0f, (float)zMap.size(), Inclination::DOWN };
-	stageSegments.push_back(s);
-	s = { SOFTLEFTCURVE, 0.0f, 400.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { SOFTLEFTCURVE, 0.0f, 400.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 400.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { SOFTRIGHTCURVE, DOWNHILL, 300.0f, (float)zMap.size(), Inclination::DOWN };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { SOFTLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { SOFTLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { SOFTRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, DOWNHILL, 0.0f, (float)zMap.size(), Inclination::DOWN };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDRIGHTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { HARDLEFTCURVE, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
-	stageSegments.push_back(s);
-	s = { 0.0f, DOWNHILL, 0.0f, (float)zMap.size(), Inclination::DOWN };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
-	stageSegments.push_back(s);
-	s = { 0.0f, UPHILL, 0.0f, (float)zMap.size(), Inclination::UP };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	s = { 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER };
-	stageSegments.push_back(s);
-	*/
-	//END OF STAGE 1
 
 	bottomSegment = stageSegments.at(currentSegment);
 	currentSegment++;
 	topSegment = stageSegments.at(currentSegment);
 	currentSegment++;
-
-	App->renderer->camera.x = 710;
 
 	return true;
 }
@@ -400,8 +304,6 @@ bool ModuleSceneStage::CleanUp()
 // Update: draw background
 update_status ModuleSceneStage::Update()
 {
-	bool drawn = false;
-
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
 	int y = SCREEN_HEIGHT * SCREEN_SIZE;
@@ -426,13 +328,47 @@ update_status ModuleSceneStage::Update()
 	float segmentFactor = topSegment.yMapPosition / zMap.size();
 
 	bool inTopSegment = false;
-	std::vector<int> elementsRemaining(elements.size());
-	for (unsigned int i = 0; i < elementsRemaining.size(); i++) {
-		elementsRemaining.at(i) = elements.at(i).nConsecutiveElements;
-	}
 
 	//Draw lines
 	std::vector<int> screenYPerWorldPosition;
+	std::vector<float> screenXPerWorldPosition;
+
+	std::vector<VisualElement> elementsToDraw;
+	z = zMap.at(0);
+	float minPosition = (z * 10) + App->player->position;
+	z = zMap.at(zMap.size() - 1);
+	float maxPosition = (z * 10) + App->player->position;
+	VisualElement vElem;
+	unsigned int n = 0;
+	vElem = elements.at(n);
+
+	while (int(vElem.worldPosition * 10) <= int(maxPosition * 10)) {
+		if (int(minPosition * 10) <= int((vElem.worldPosition + vElem.nConsecutiveElements) * 10)) {
+			elementsToDraw.push_back(vElem);
+			if (vElem.nConsecutiveElements > 0) {
+				bool insideRange = true;
+				for (int i = 1; i <= vElem.nConsecutiveElements && insideRange == true; i++) {
+					vElem.worldPosition += (float)i;
+					if (int((vElem.worldPosition * 10)) <= int((maxPosition * 10))) {
+						elementsToDraw.push_back(vElem);
+					}
+					else {
+						insideRange = false;
+					}
+					vElem.worldPosition -= (float)i;
+				}
+			}
+		}
+		n++;
+		if (n > elements.size() - 1)
+			break;
+		vElem = elements.at(n);
+	}
+
+	std::vector<bool> elementDrawn(elementsToDraw.size());
+	for (std::vector<bool>::iterator it = elementDrawn.begin(); it != elementDrawn.end(); ++it)
+		*it = false;
+
 	for (unsigned int i = 0; i < zMap.size(); i++) {
 		z = zMap.at(i);
 
@@ -449,11 +385,12 @@ update_status ModuleSceneStage::Update()
 		}
 		ddX += dX;
 		x += ddX;
+		screenXPerWorldPosition.push_back(x);
 
 		roadSeparation = initialRoadSeparation - (separationInterval * -(-1 + segmentFactor));
 
 		worldPosition = (z * 10) + App->player->position;
-		
+
 		//Check if uphill, downhill or no hill
 		if (dY < 0) {
 			float percentage = 0.0f;
@@ -502,55 +439,31 @@ update_status ModuleSceneStage::Update()
 		screenYPerWorldPosition.push_back(screenY);
 	}
 
-	std::vector<VisualElement> elementsToDraw;
-	z = zMap.at(zMap.size() - 1);
-	float maxPosition = (z * 10) + App->player->position;
-	VisualElement vElem;
-	unsigned int n = 0;
-	vElem = elements.at(n);
-	while (int(vElem.worldPosition * 10) <= int(maxPosition * 10)) {
-		elementsToDraw.push_back(vElem);
-		if (vElem.nConsecutiveElements > 0) {
-			bool insideRange = true;
-			for (int i = 1; i <= vElem.nConsecutiveElements && insideRange == true; i++) {
-				vElem.worldPosition += (float) i;
-				if (int((vElem.worldPosition * 10)) <= int((maxPosition * 10))) {
-					elementsToDraw.push_back(vElem);
-				}
-				else {
-					insideRange = false;
-				}
-				vElem.worldPosition -= (float) i;
-			}
-		}
-		n++;
-		if (n > elements.size() - 1)
-			break;
-		vElem = elements.at(n);
-	}
+	int height;
+	float width;
+	float screenFactor = 0.0f;
 
-	std::vector<bool> elementDrawn(elementsToDraw.size());
-	for (std::vector<bool>::iterator it = elementDrawn.begin(); it != elementDrawn.end(); ++it)
-		*it = false;
-
-	int screen;
 	for (int i = zMap.size() - 1; i >= 0; i--) {
 		z = zMap.at(i);
 		scaleFactor = factorMap.at(i);
 		worldPosition = (z * 10) + App->player->position;
 		roadSeparation = initialRoadSeparation - (separationInterval * -(-1 + segmentFactor));
-		screen = screenYPerWorldPosition.at(i);
+		height = screenYPerWorldPosition.at(i);
+		width = screenXPerWorldPosition.at(i);
 
 		n = 0;
 		vElem = elementsToDraw.at(n);
-		while (int(vElem.worldPosition * 10) <= int(worldPosition * 10)) {
+		while (n < elementsToDraw.size()) {
 			if (int(worldPosition * 10) == int(vElem.worldPosition * 10) && elementDrawn.at(n) == false) {
 				SDL_Rect rect;
-				int a = int((vElem.x * scaleFactor) + 25);
-				int b = int(vElem.y + (vElem.rect.h - (ceil(vElem.rect.h * scaleFactor)) + 50 * scaleFactor));
 				switch (vElem.position) {
 				case VisualElementPosition::LEFT:
-					App->renderer->Blit(vElem.texture, int(vElem.x + (SCREEN_WIDTH * (1 - scaleFactor) / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+					if (vElem.overHorizon == true) {
+						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+					}
+					else {
+						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+					}
 					break;
 				case VisualElementPosition::CENTER:
 					rect = vElem.rect;
@@ -563,14 +476,28 @@ update_status ModuleSceneStage::Update()
 					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
 					break;
 				case VisualElementPosition::LEFTANDCENTER:
-					//App->renderer->Blit(vElem.texture, int((vElem.x * scaleFactor) - ((1 - scaleFactor) * 75)), int(vElem.y + (vElem.rect.h - (ceil(vElem.rect.h * scaleFactor)) + 85 * scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
-					App->renderer->Blit(vElem.texture, int((vElem.x * scaleFactor) - ((1 - scaleFactor) * 75)), (screen / SCREEN_SIZE) - (vElem.rect.h * scaleFactor), &(vElem.rect), 0.5f, scaleFactor);
+					if (vElem.overHorizon == true) {
+						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+					}
+					else {
+						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+					}
 					rect = vElem.rect;
 					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int((SCREEN_WIDTH / 2) + App->renderer->camera.x * scaleFactor), int(vElem.y * (2 - scaleFactor)), &(rect), 0.5f, scaleFactor);
+					if (vElem.overHorizon == true) {
+						App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+					}
+					else {
+						App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+					}
 					break;
 				case VisualElementPosition::LEFTANDRIGHT:
-					App->renderer->Blit(vElem.texture, int(vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+					if (vElem.overHorizon == true) {
+						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+					}
+					else {
+						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+					}
 					rect = vElem.rect;
 					rect.x += rect.w;
 					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);

@@ -56,13 +56,14 @@ struct VisualElement {
 	SDL_Rect rect;
 	int x;
 	int y;
+	bool overHorizon;
 	float worldPosition;
 	int nConsecutiveElements; 
 	VisualElementPosition position;
 
 	VisualElement() {};
-	VisualElement(SDL_Texture* texture, SDL_Rect rect, int x, int y, float worldPosition, int nConsecutiveElements, VisualElementPosition position) : 
-		texture(texture), rect(rect), x(x), y(y),	worldPosition(worldPosition), nConsecutiveElements(nConsecutiveElements), position(position) {};
+	VisualElement(SDL_Texture* texture, SDL_Rect rect, int x, int y, bool overHorizon, float worldPosition, int nConsecutiveElements, VisualElementPosition position) :
+		texture(texture), rect(rect), x(x), y(y), overHorizon(overHorizon), worldPosition(worldPosition), nConsecutiveElements(nConsecutiveElements), position(position) {};
 };
 
 class ModuleSceneStage : public Module
