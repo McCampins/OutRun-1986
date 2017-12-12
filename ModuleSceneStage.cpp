@@ -223,7 +223,7 @@ bool ModuleSceneStage::Start()
 				}
 				anim.frames.push_back({ animationFrame[0].GetInt(), animationFrame[1].GetInt(), animationFrame[2].GetInt(), animationFrame[3].GetInt() });
 			}
-			anim.speed = 0.2f;
+			anim.speed = 0.15f;
 		}
 		else {
 			const rapidjson::Value& rectInfor = arrRect[0];

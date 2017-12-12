@@ -195,13 +195,24 @@ update_status ModulePlayer::Update()
 	{
 		keysPressed += 1;
 		if (playerSpeed > 0.0f) {
-			normalizedSpeed = (MAX_SPEED - playerSpeed) / MAX_SPEED;
+			normalizedSpeed = playerSpeed/ MAX_SPEED;
 			if (normalizedSpeed < 0.5f) {
-				App->renderer->camera.x += 9;
+				if (normalizedSpeed > 0.05f) {
+					if (normalizedSpeed < 0.1f) {
+						App->renderer->camera.x += 6;
+					}
+					else {
+						App->renderer->camera.x += 9;
+					}
+				}
 			}
 			else {
-				if (playerSpeed > 0.05f)
+				if (normalizedSpeed > 0.75f) {
+					App->renderer->camera.x += 6;
+				}
+				else {
 					App->renderer->camera.x += 3;
+				}
 			}
 
 		}
@@ -212,11 +223,22 @@ update_status ModulePlayer::Update()
 		if (playerSpeed > 0.0f) {
 			normalizedSpeed = (MAX_SPEED - playerSpeed) / MAX_SPEED;
 			if (normalizedSpeed < 0.5f) {
-				App->renderer->camera.x -= 9;
+				if (normalizedSpeed > 0.05f) {
+					if (normalizedSpeed < 0.1f) {
+						App->renderer->camera.x -= 6;
+					}
+					else {
+						App->renderer->camera.x -= 9;
+					}
+				}
 			}
 			else {
-				if (playerSpeed > 0.05f)
+				if (normalizedSpeed > 0.75f) {
+					App->renderer->camera.x -= 6;
+				}
+				else {
 					App->renderer->camera.x -= 3;
+				}
 			}
 		}
 	}
