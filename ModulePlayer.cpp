@@ -221,7 +221,7 @@ update_status ModulePlayer::Update()
 	{
 		keysPressed += 2;
 		if (playerSpeed > 0.0f) {
-			normalizedSpeed = (MAX_SPEED - playerSpeed) / MAX_SPEED;
+			normalizedSpeed = playerSpeed / MAX_SPEED;
 			if (normalizedSpeed < 0.5f) {
 				if (normalizedSpeed > 0.05f) {
 					if (normalizedSpeed < 0.1f) {

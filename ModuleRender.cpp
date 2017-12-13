@@ -39,6 +39,23 @@ bool ModuleRender::Init()
 
 	camera.x = initCameraX;
 
+	firstRumbleX = -(ROADWIDTH * 3) - (RUMBLEWIDTH / 2) - (LINEWIDTH * 3.5f);
+	firstLineX = -(ROADWIDTH * 3) - (LINEWIDTH * 3);
+	firstRoadX = -(ROADWIDTH * 2.5f) - (LINEWIDTH * 2.5f);
+	firstSecondLineX = -(ROADWIDTH * 2) - (LINEWIDTH * 2);
+	secondRoadX = -(ROADWIDTH * 1.5f) - (LINEWIDTH * 1.5f);
+	secondThirdLineX = -(ROADWIDTH)-(LINEWIDTH);
+	secondRumbleX = -(RUMBLEWIDTH / 2) - (LINEWIDTH / 2);
+	thirdRoadX = -(ROADWIDTH / 2) - (LINEWIDTH / 2);
+	thirdRumbleX = (RUMBLEWIDTH / 2) + (LINEWIDTH / 2);
+	fourthRoadX = (ROADWIDTH / 2) + (LINEWIDTH / 2);
+	fourthFifthLineX = (ROADWIDTH)+(LINEWIDTH);
+	fifthRoadX = (ROADWIDTH * 1.5f) + (LINEWIDTH * 1.5f);
+	fifthSixthLineX = (ROADWIDTH * 2) + (LINEWIDTH * 2);
+	sixthRoadX = (ROADWIDTH * 2.5f) + (LINEWIDTH * 2.5f);
+	sixthLineX = (ROADWIDTH * 3) + (LINEWIDTH * 3);
+	fourthRumbleX = (ROADWIDTH * 3) + (RUMBLEWIDTH / 2) + (LINEWIDTH * 3.5f);
+
 	return ret;
 }
 
@@ -171,11 +188,104 @@ bool ModuleRender::DrawHorizontalLine(float x, int y, float w, Uint8 r, Uint8 g,
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
-	if (SDL_RenderDrawLine(renderer, static_cast<int>(x - (w / 2)), y, static_cast<int>(x + (w / 2)), y) != 0)
+	if (SDL_RenderDrawLine(renderer, int(x - (w / 2)), y, int(x + (w / 2)), y) != 0)
 	{
 		LOG("Cannot draw line to screen. SDL_RenderDrawLine error: %s", SDL_GetError());
 		ret = false;
 	}
 
 	return ret;
+}
+
+int ModuleRender::DrawRoads(int screenY, float worldPosition, float scaleFactor, float x, float roadSeparation, int times) {
+	float drawX = x + App->renderer->camera.x * scaleFactor;
+	if ((int)worldPosition % 2 == 0)
+	{
+		for (int i = 0; i < times; i++) {
+			screenY--;
+			//Terrain
+			App->renderer->DrawHorizontalLine(drawX, screenY, TERRAINWIDTH, 219, 209, 180, 255);
+			//Rumble
+			App->renderer->DrawHorizontalLine(drawX + (firstRumbleX * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 161, 160, 161, 255);
+			//1st Road Line
+			App->renderer->DrawHorizontalLine(drawX + (firstLineX * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//1st Road
+			App->renderer->DrawHorizontalLine(drawX + (firstRoadX * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
+			//1st Road - 2nd Road Line
+			App->renderer->DrawHorizontalLine(drawX + (firstSecondLineX * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//2nd Road
+			App->renderer->DrawHorizontalLine(drawX + (secondRoadX * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
+			//2nd Road - 3rd Road Line
+			App->renderer->DrawHorizontalLine(drawX + (secondThirdLineX * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//Rigth Road Rumble (before 3rd Road in case both roads intersect)
+			App->renderer->DrawHorizontalLine(drawX + ((secondRumbleX + roadSeparation) * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 161, 160, 161, 255);
+			//3rd Road
+			App->renderer->DrawHorizontalLine(drawX + (thirdRoadX * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
+			//3rd Road Line
+			App->renderer->DrawHorizontalLine(drawX, screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//4th Road Line (same coordinates as they might intersect)
+			App->renderer->DrawHorizontalLine(drawX + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//Left Road Rumble (before 4th Road in case both roads intersect)
+			App->renderer->DrawHorizontalLine(drawX + (thirdRumbleX * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 161, 160, 161, 255);
+			//4th Road
+			App->renderer->DrawHorizontalLine(drawX + ((fourthRoadX + roadSeparation) * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
+			//4th Road - 5th Road Line
+			App->renderer->DrawHorizontalLine(drawX + ((fourthFifthLineX + roadSeparation) * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//5th Road
+			App->renderer->DrawHorizontalLine(drawX + ((fifthRoadX + roadSeparation) * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
+			//5th Road - 6th Road Line
+			App->renderer->DrawHorizontalLine(drawX + ((fifthSixthLineX + roadSeparation) * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//6th Road
+			App->renderer->DrawHorizontalLine(drawX + ((sixthRoadX + roadSeparation)  * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
+			//6th Road Line
+			App->renderer->DrawHorizontalLine(drawX + ((sixthLineX + roadSeparation)  * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//Rumble
+			App->renderer->DrawHorizontalLine(drawX + ((fourthRumbleX + roadSeparation) * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 161, 160, 161, 255);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < times; i++) {
+			screenY--;
+			//Terrain
+			App->renderer->DrawHorizontalLine(drawX, screenY, TERRAINWIDTH, 194, 178, 128, 255);
+			//Rumble
+			App->renderer->DrawHorizontalLine(drawX + (firstRumbleX * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//1st Road Line
+			App->renderer->DrawHorizontalLine(drawX + (firstLineX * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
+			//1st Road
+			App->renderer->DrawHorizontalLine(drawX + (firstRoadX * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
+			//1st Road - 2nd Road Line
+			App->renderer->DrawHorizontalLine(drawX + (firstSecondLineX * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
+			//2nd Road
+			App->renderer->DrawHorizontalLine(drawX + (secondRoadX * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
+			//2nd Road - 3rd Road Line
+			App->renderer->DrawHorizontalLine(drawX + (secondThirdLineX * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
+			//Rigth Road Rumble (before 3rd Road in case both roads intersect)
+			App->renderer->DrawHorizontalLine(drawX + ((secondRumbleX + roadSeparation) * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//3rd Road
+			App->renderer->DrawHorizontalLine(drawX + (thirdRoadX * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
+			//3rd Road Line
+			App->renderer->DrawHorizontalLine(drawX, screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
+			//4th Road Line (same coordinates as they might intersect)
+			App->renderer->DrawHorizontalLine(drawX + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
+			//Left Road Rumble (before 4th Road in case they intersect)
+			App->renderer->DrawHorizontalLine(drawX + (thirdRumbleX * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 255, 255, 255, 255);
+			//4th Road
+			App->renderer->DrawHorizontalLine(drawX + ((fourthRoadX + roadSeparation) * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
+			//4th Road - 5th Road Line
+			App->renderer->DrawHorizontalLine(drawX + ((fourthFifthLineX + roadSeparation) * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
+			//5th Road
+			App->renderer->DrawHorizontalLine(drawX + ((fifthRoadX + roadSeparation) * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
+			//5th Road - 6th Road Line
+			App->renderer->DrawHorizontalLine(drawX + ((fifthSixthLineX + roadSeparation) * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
+			//6th Road
+			App->renderer->DrawHorizontalLine(drawX + ((sixthRoadX + roadSeparation)  * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
+			//6th Road Line
+			App->renderer->DrawHorizontalLine(drawX + ((sixthLineX + roadSeparation)  * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
+			//Rumble
+			App->renderer->DrawHorizontalLine(drawX + ((fourthRumbleX + roadSeparation) * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 255, 255, 255, 255);
+		}
+	}
+	return screenY;
 }

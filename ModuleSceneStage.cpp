@@ -27,6 +27,11 @@ ModuleSceneStage::~ModuleSceneStage()
 {
 }
 
+double clockToMilliseconds(clock_t ticks) {
+	// units/(units/time) => time (seconds) * 1000 = milliseconds
+	return (ticks / (double)CLOCKS_PER_SEC)*1000.0;
+}
+
 // Load assets
 bool ModuleSceneStage::Start()
 {
@@ -299,6 +304,8 @@ bool ModuleSceneStage::Start()
 	topSegment = stageSegments.at(currentSegment);
 	currentSegment++;
 
+	msLog.open("log.txt");
+	
 	return true;
 }
 
@@ -307,17 +314,24 @@ bool ModuleSceneStage::CleanUp()
 {
 	LOG("Unloading space scene");
 
+	for (unordered_map<std::string, SDL_Texture*>::iterator it = textures.begin(); it != textures.end(); ++it)
+		App->textures->Unload(it->second);
+
 	//App->textures->Unload(background);
 	App->player->Disable();
 	App->collision->Disable();
 	App->particles->Disable();
 
+	msLog.close();
 	return true;
 }
 
 // Update: draw background
 update_status ModuleSceneStage::Update()
 {
+	clock_t beginFrame = clock();
+	int typeOfRoad = 0;
+
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
 	int screenY = SCREEN_HEIGHT * SCREEN_SIZE;
@@ -383,7 +397,14 @@ update_status ModuleSceneStage::Update()
 	for (std::vector<bool>::iterator it = elementDrawn.begin(); it != elementDrawn.end(); ++it)
 		*it = false;
 
+	clock_t endDraw = clock();
+	double totalDraw = 0;
+	double msInitRoad = 0;
+	double msDrawRoad = 0;
+	double msEndRoad = 0;
 	for (unsigned int i = 0; i < zMap.size(); i++) {
+		clock_t roadStart = clock();
+
 		z = zMap.at(i);
 
 		scaleFactor = factorMap.at(i);
@@ -405,8 +426,12 @@ update_status ModuleSceneStage::Update()
 
 		worldPosition = (z * 10) + App->player->position;
 
+		clock_t roadInit = clock();
+
 		//Check if uphill, downhill or no hill
 		if (dY < 0) {
+			typeOfRoad = -1;
+
 			float percentage = 0.0f;
 			if (inTopSegment == true) {
 				percentage = (float)(i - topSegment.yMapPosition) / (zMap.size() - topSegment.yMapPosition);
@@ -414,14 +439,20 @@ update_status ModuleSceneStage::Update()
 			else {
 				percentage = (float)i / topSegment.yMapPosition;
 			}
-			if (percentage < 0.5f)
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-			if (percentage < 0.25f)
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-			if (percentage < 0.05f)
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+
+			if (percentage < 0.05f) {
+				screenY = App->renderer->DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation, 3);
+			}
+			else if (percentage < 0.25f) {
+				screenY = App->renderer->DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation, 2);
+			}
+			else if (percentage < 0.5f) {
+				screenY = App->renderer->DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+			}
 		}
 		else if (dY > 0) {
+			typeOfRoad = 1;
+
 			float percentage = 0.0f;
 			if (inTopSegment == true) {
 				percentage = (float)(i - topSegment.yMapPosition) / (zMap.size() - topSegment.yMapPosition);
@@ -429,29 +460,42 @@ update_status ModuleSceneStage::Update()
 			else {
 				percentage = (float)i / topSegment.yMapPosition;
 			}
+
 			if (percentage < 0.2f) {
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+				screenY = App->renderer->DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 			}
 			else if (percentage < 0.7f) {
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+				screenY = App->renderer->DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation, 2);
 			}
 			else {
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
-				screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+				screenY = App->renderer->DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation, 3);
 			}
 		}
 		else {
-			screenY = DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
+			typeOfRoad = 0;
+			screenY = App->renderer->DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 		}
+
+		clock_t roadDraw = clock();
+
 		//If the line we are drawing is the one the tires are placed, check if they are out of the road
 		if (screenY == (SCREEN_HEIGHT - 8) * SCREEN_SIZE) {
 			leftTireOut = CheckLeftTire(x, scaleFactor, roadSeparation);
 			rigthTireOut = CheckRightTire(x, scaleFactor, roadSeparation);
 		}
 		screenYPerWorldPosition.push_back(screenY);
+
+		clock_t roadTire = clock();
+
+		msInitRoad += clockToMilliseconds(roadInit - roadStart);
+		msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
+		msEndRoad += clockToMilliseconds(roadTire - roadDraw);
 	}
+	//msLog << "ms: " << msInitRoad << " + " << msDrawRoad << " + " << msEndRoad << " --- " << typeOfRoad << endl;
+	totalDraw = msInitRoad + msDrawRoad + msEndRoad;
+	//msLog << "---------\n\t" << totalDraw << "\n------------" << endl;
+
+	clock_t endRoad = clock();
 
 	int height;
 	float width;
@@ -615,6 +659,7 @@ update_status ModuleSceneStage::Update()
 		}
 	}
 
+	clock_t endVisual = clock();
 
 	//Update segments
 	App->renderer->camera.x += curveCameraMove;
@@ -665,95 +710,15 @@ update_status ModuleSceneStage::Update()
 		}
 	}
 
+	clock_t endFrame = clock();
+	double msTotalPassed = clockToMilliseconds(endFrame - beginFrame);
+	double msDraw = clockToMilliseconds(endDraw - beginFrame);
+	double msRoad = clockToMilliseconds(endRoad - endDraw);
+	double msVisual = clockToMilliseconds(endVisual - endRoad);
+	double msAdjustments = clockToMilliseconds(endFrame - endVisual);
+	msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
 
 	return UPDATE_CONTINUE;
-}
-
-int ModuleSceneStage::DrawRoads(int screenY, float worldPosition, float scaleFactor, float x, float roadSeparation) {
-	screenY--;
-	if ((int)worldPosition % 2 == 0)
-	{
-		//Terrain
-		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor, screenY, TERRAINWIDTH, 219, 209, 180, 255);
-		//Rumble
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 3) - (RUMBLEWIDTH * scaleFactor / 2) - (LINEWIDTH * scaleFactor * 3.5f) + App->renderer->camera.x * scaleFactor, screenY, RUMBLEWIDTH * scaleFactor, 161, 160, 161, 255);
-		//1st Road Line
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 3) - (LINEWIDTH * scaleFactor * 3) + App->renderer->camera.x * scaleFactor, screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//1st Road
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 2.5f) - (LINEWIDTH * scaleFactor * 2.5f) + App->renderer->camera.x * scaleFactor, screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
-		//1st Road - 2nd Road Line
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 2) - (LINEWIDTH * scaleFactor * 2) + App->renderer->camera.x * scaleFactor, screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//2nd Road
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 1.5f) - (LINEWIDTH * scaleFactor * 1.5f) + App->renderer->camera.x * scaleFactor, screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
-		//2nd Road - 3rd Road Line
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor) - (LINEWIDTH * scaleFactor) + App->renderer->camera.x * scaleFactor, screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//Rigth Road Rumble (before 3rd Road in case both roads intersect)
-		App->renderer->DrawHorizontalLine(x - (RUMBLEWIDTH * scaleFactor / 2) - (LINEWIDTH * scaleFactor / 2) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 161, 160, 161, 255);
-		//3rd Road
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor / 2) - (LINEWIDTH * scaleFactor / 2) + App->renderer->camera.x * scaleFactor, screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
-		//3rd Road Line
-		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor, screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//4th Road Line (same coordinates as they might intersect)
-		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//Left Road Rumble (before 4th Road in case both roads intersect)
-		App->renderer->DrawHorizontalLine(x + (RUMBLEWIDTH * scaleFactor / 2) + (LINEWIDTH * scaleFactor / 2) + App->renderer->camera.x * scaleFactor, screenY, RUMBLEWIDTH * scaleFactor, 161, 160, 161, 255);
-		//4th Road
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor / 2) + (LINEWIDTH * scaleFactor / 2) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
-		//4th Road - 5th Road Line
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor) + (LINEWIDTH * scaleFactor) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//5th Road
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 1.5f) + (LINEWIDTH * scaleFactor * 1.5f) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
-		//5th Road - 6th Road Line
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 2) + (LINEWIDTH * scaleFactor * 2) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//6th Road
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 2.5f) + (LINEWIDTH * scaleFactor * 2.5f) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, ROADWIDTH * scaleFactor, 161, 160, 161, 255);
-		//6th Road Line
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 3) + (LINEWIDTH * scaleFactor * 3) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//Rumble
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 3) + (RUMBLEWIDTH * scaleFactor / 2) + (LINEWIDTH * scaleFactor * 3.5f) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 161, 160, 161, 255);
-	}
-	else
-	{
-		//Terrain
-		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor, screenY, TERRAINWIDTH, 194, 178, 128, 255);
-		//Rumble
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 3) - (RUMBLEWIDTH * scaleFactor / 2) - (LINEWIDTH * scaleFactor * 3.5f) + App->renderer->camera.x * scaleFactor, screenY, RUMBLEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//1st Road Line
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 3) - (LINEWIDTH * scaleFactor * 3) + App->renderer->camera.x * scaleFactor, screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
-		//1st Road
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 2.5f) - (LINEWIDTH * scaleFactor * 2.5f) + App->renderer->camera.x * scaleFactor, screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
-		//1st Road - 2nd Road Line
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 2) - (LINEWIDTH * scaleFactor * 2) + App->renderer->camera.x * scaleFactor, screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
-		//2nd Road
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor * 1.5f) - (LINEWIDTH * scaleFactor * 1.5f) + App->renderer->camera.x * scaleFactor, screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
-		//2nd Road - 3rd Road Line
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor) - (LINEWIDTH * scaleFactor) + App->renderer->camera.x * scaleFactor, screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
-		//Rigth Road Rumble (before 3rd Road in case both roads intersect)
-		App->renderer->DrawHorizontalLine(x - (RUMBLEWIDTH * scaleFactor / 2) - (LINEWIDTH * scaleFactor / 2) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//3rd Road
-		App->renderer->DrawHorizontalLine(x - (ROADWIDTH * scaleFactor / 2) - (LINEWIDTH * scaleFactor / 2) + App->renderer->camera.x * scaleFactor, screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
-		//3rd Road Line
-		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor, screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
-		//4th Road Line (same coordinates as they might intersect)
-		App->renderer->DrawHorizontalLine(x + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
-		//Left Road Rumble (before 4th Road in case they intersect)
-		App->renderer->DrawHorizontalLine(x + (RUMBLEWIDTH * scaleFactor / 2) + (LINEWIDTH * scaleFactor / 2) + App->renderer->camera.x * scaleFactor, screenY, RUMBLEWIDTH * scaleFactor, 255, 255, 255, 255);
-		//4th Road
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor / 2) + (LINEWIDTH * scaleFactor / 2) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
-		//4th Road - 5th Road Line
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor) + (LINEWIDTH * scaleFactor) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
-		//5th Road
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 1.5f) + (LINEWIDTH * scaleFactor * 1.5f) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
-		//5th Road - 6th Road Line
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 2) + (LINEWIDTH * scaleFactor * 2) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
-		//6th Road
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 2.5f) + (LINEWIDTH * scaleFactor * 2.5f) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, ROADWIDTH * scaleFactor, 170, 170, 170, 255);
-		//6th Road Line
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 3) + (LINEWIDTH * scaleFactor * 3) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, LINEWIDTH * scaleFactor, 170, 170, 170, 255);
-		//Rumble
-		App->renderer->DrawHorizontalLine(x + (ROADWIDTH * scaleFactor * 3) + (RUMBLEWIDTH * scaleFactor / 2) + (LINEWIDTH * scaleFactor * 3.5f) + App->renderer->camera.x * scaleFactor + (roadSeparation * scaleFactor), screenY, RUMBLEWIDTH * scaleFactor, 255, 255, 255, 255);
-	}
-	return screenY;
 }
 
 bool ModuleSceneStage::CheckLeftTire(float x, float scaleFactor, float roadSeparation)

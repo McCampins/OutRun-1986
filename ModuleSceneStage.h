@@ -4,11 +4,6 @@
 #define ROADHEIGHTWORLD -200
 #define ROADHEIGHTSCREEN 200
 
-#define ROADWIDTH 450
-#define RUMBLEWIDTH 50
-#define LINEWIDTH 24
-#define TERRAINWIDTH 6000
-
 #define SOFTLEFTCURVE -0.01f
 #define SOFTRIGHTCURVE 0.01f
 #define HARDLEFTCURVE -0.02f
@@ -20,6 +15,9 @@
 
 #include <cmath>
 #include <unordered_map>
+#include <ctime>
+#include <fstream>
+
 #include "Module.h"
 
 struct SDL_Texture;
@@ -99,13 +97,13 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	int DrawRoads(int screenY, float worldPosition, float scaleFactor, float x, float roadSeparation);
 	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation);
 	bool CheckRightTire(float x, float scaleFactor, float roadSeparation);
 
 public:
+	//textures
 	SDL_Texture* background = nullptr; 
-	SDL_Texture* startFlag = nullptr;
+	//Road info
 	std::vector<float> zMap;
 	std::vector<float> factorMap;
 	std::vector<Segment> stageSegments;
@@ -115,8 +113,11 @@ public:
 	int curveCameraMove = 0;
 	bool leftTireOut = false;
 	bool rigthTireOut = false;
+	//Visual elements info
 	std::unordered_map<std::string, SDL_Texture*> textures;
 	std::vector<VisualElement> elements;
+	//Performance log
+	ofstream msLog;
 };
 
 #endif // __MODULESCENESTAGE_H__
