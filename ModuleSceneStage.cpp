@@ -398,13 +398,8 @@ update_status ModuleSceneStage::Update()
 		*it = false;
 
 	clock_t endDraw = clock();
-	double totalDraw = 0;
-	double msInitRoad = 0;
 	double msDrawRoad = 0;
-	double msEndRoad = 0;
 	for (unsigned int i = 0; i < zMap.size(); i++) {
-		clock_t roadStart = clock();
-
 		z = zMap.at(i);
 
 		scaleFactor = factorMap.at(i);
@@ -485,14 +480,11 @@ update_status ModuleSceneStage::Update()
 		}
 		screenYPerWorldPosition.push_back(screenY);
 
-		clock_t roadTire = clock();
-
-		msInitRoad += clockToMilliseconds(roadInit - roadStart);
 		msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
-		msEndRoad += clockToMilliseconds(roadTire - roadDraw);
 	}
+	msLog << "ms: " << msDrawRoad;
 	//msLog << "ms: " << msInitRoad << " + " << msDrawRoad << " + " << msEndRoad << " --- " << typeOfRoad << endl;
-	totalDraw = msInitRoad + msDrawRoad + msEndRoad;
+	//totalDraw = msInitRoad + msDrawRoad + msEndRoad;
 	//msLog << "---------\n\t" << totalDraw << "\n------------" << endl;
 
 	clock_t endRoad = clock();
@@ -716,7 +708,7 @@ update_status ModuleSceneStage::Update()
 	double msRoad = clockToMilliseconds(endRoad - endDraw);
 	double msVisual = clockToMilliseconds(endVisual - endRoad);
 	double msAdjustments = clockToMilliseconds(endFrame - endVisual);
-	msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
+	//msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
 
 	return UPDATE_CONTINUE;
 }
