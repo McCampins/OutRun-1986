@@ -538,9 +538,32 @@ update_status ModuleSceneStage::Update()
 					}
 					break;
 				case VisualElementPosition::RIGHT:
-					rect = vElem.rect;
-					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+					if (vElem.overHorizon == true) {
+						if (vElem.anim.frames.size() > 0) {
+							for (std::unordered_map<int, VisualElement>::iterator it = visualElements.begin(); it != visualElements.end(); ++it) {
+								VisualElement* aux = &(it->second);
+								if (vElem.CopyOf(it->second)) {
+									App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+								}
+							}
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						}
+					}
+					else {
+						if (vElem.anim.frames.size() > 0) {
+							for (std::unordered_map<int, VisualElement>::iterator it = visualElements.begin(); it != visualElements.end(); ++it) {
+								VisualElement* aux = &(it->second);
+								if (vElem.CopyOf(it->second)) {
+									App->renderer->Blit(aux->texture, int((width + (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+								}
+							}
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						}
+					}
 					break;
 				case VisualElementPosition::LEFTANDCENTER:
 					if (vElem.overHorizon == true) {
@@ -588,12 +611,31 @@ update_status ModuleSceneStage::Update()
 						}
 					}
 					else {
-						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						if (vElem.anim.frames.size() > 0) {
 
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						}
 					}
 					rect = vElem.rect;
 					rect.x += rect.w;
-					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+					if (vElem.overHorizon == true) {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width - (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+						}
+					}
+					else {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width - (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+						}
+					}
 					break;
 				case VisualElementPosition::CENTERANDRIGHT:
 					rect = vElem.rect;

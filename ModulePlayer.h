@@ -4,8 +4,8 @@
 #include "Module.h"
 #include "Animation.h"
 
-#define MAX_SPEED 0.4f
-#define ACCELERATION 0.001f
+#define MAX_SPEED 0.2f
+#define ACCELERATION 0.0005f
 
 struct SDL_Texture;
 

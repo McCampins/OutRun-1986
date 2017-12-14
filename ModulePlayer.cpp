@@ -113,17 +113,17 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 	femalePlayerMoving.speed = 0.025f;
 
 	//Dust (left tire)
-	leftDust.frames.push_back({ 0, 29, 68, 33 });
-	leftDust.frames.push_back({ 0, 61, 70, 33 });
-	leftDust.frames.push_back({ 0, 98, 69, 33 });
-	leftDust.frames.push_back({ 0, 133, 72, 33 });
+	leftDust.frames.push_back({ 0, 13, 68, 28 });
+	leftDust.frames.push_back({ 0, 45, 68, 28 });
+	leftDust.frames.push_back({ 0, 81, 68, 28 });
+	leftDust.frames.push_back({ 0, 124, 68, 32 });
 	leftDust.speed = 0.25f;
 
 	//Dust (right tire)
-	rightDust.frames.push_back({ 79, 29, 68, 33 });
-	rightDust.frames.push_back({ 79, 61, 70, 33 });
-	rightDust.frames.push_back({ 79, 98, 69, 33 });
-	rightDust.frames.push_back({ 79, 133, 72, 33 });
+	rightDust.frames.push_back({ 80, 13, 68, 28 });
+	rightDust.frames.push_back({ 80, 45, 68, 28 });
+	rightDust.frames.push_back({ 80, 81, 68, 28 });
+	rightDust.frames.push_back({ 80, 124, 68, 32 });
 	rightDust.speed = 0.25f;
 }
 
@@ -426,11 +426,11 @@ update_status ModulePlayer::Update()
 	//Draw out of road particles
 	bool out = false;
 	if (App->scene_stage->leftTireOut) {
-		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE) - 75, SCREEN_HEIGHT - 40, &(leftDust.GetCurrentFrame()));
+		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE) - 75, SCREEN_HEIGHT - 35, &(leftDust.GetCurrentFrame()));
 		out = true;
 	}
 	if (App->scene_stage->rigthTireOut) {
-		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 40, &(rightDust.GetCurrentFrame()));
+		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 35, &(rightDust.GetCurrentFrame()));
 		out = true;
 	}
 	if (out) {
