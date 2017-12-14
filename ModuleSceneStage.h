@@ -57,12 +57,12 @@ struct VisualElement {
 	int y;
 	bool overHorizon;
 	int nConsecutiveElements;
-	float worldPosition; 
+	float world;
 	VisualElementPosition position;
 
 	VisualElement() {};
-	VisualElement(SDL_Texture* texture, SDL_Rect rect, Animation anim, int x, int y, bool overHorizon, int nConsecutiveElements, float worldPosition, VisualElementPosition position) :
-		texture(texture), rect(rect), anim(anim), x(x), y(y), overHorizon(overHorizon), nConsecutiveElements(nConsecutiveElements), worldPosition(worldPosition), position(position) {};
+	VisualElement(SDL_Texture* texture, SDL_Rect rect, Animation anim, int x, int y, bool overHorizon, int nConsecutiveElements, float world, VisualElementPosition position) :
+		texture(texture), rect(rect), anim(anim), x(x), y(y), overHorizon(overHorizon), nConsecutiveElements(nConsecutiveElements), world(world), position(position) {};
 
 	bool CopyOf(VisualElement ve) {
 		if (rect.x != ve.rect.x || rect.y != ve.rect.y || rect.w != ve.rect.w || rect.h != ve.rect.h)
@@ -78,6 +78,9 @@ struct VisualElement {
 			return false;
 
 		if (nConsecutiveElements != ve.nConsecutiveElements)
+			return false;
+
+		if (int(world * 10) != int(ve.world * 10))
 			return false;
 
 		if (position != ve.position)
@@ -115,7 +118,7 @@ public:
 	bool rigthTireOut = false;
 	//Visual elements info
 	std::unordered_map<std::string, SDL_Texture*> textures;
-	std::vector<VisualElement> elements;
+	std::unordered_multimap<int, VisualElement> visualElements;
 	//Performance log
 	ofstream msLog;
 };

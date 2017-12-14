@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <set>
 
 #include "Globals.h"
 #include "Application.h"
@@ -182,7 +183,7 @@ bool ModuleSceneStage::Start()
 
 	const char* texPath;
 	int elemX, elemY, overHorizon, nConsElem;
-	float world;
+	float world, increment;
 	bool horizon;
 	string pos;
 	VisualElementPosition vpos;
@@ -262,6 +263,9 @@ bool ModuleSceneStage::Start()
 		assert(valElem[i].HasMember("worldPosition"));
 		assert(valElem[i]["worldPosition"].IsFloat());
 		world = valElem[i]["worldPosition"].GetFloat();
+		assert(valElem[i].HasMember("increment"));
+		assert(valElem[i]["increment"].IsFloat());
+		increment = valElem[i]["increment"].GetFloat();
 		assert(valElem[i].HasMember("nConsecutiveElements"));
 		assert(valElem[i]["nConsecutiveElements"].IsInt());
 		nConsElem = valElem[i]["nConsecutiveElements"].GetInt();
@@ -295,8 +299,13 @@ bool ModuleSceneStage::Start()
 			return false;
 		}
 
-		v = { tex, r, anim, elemX, elemY, horizon, nConsElem, world, vpos };
-		elements.push_back(v);
+		float newWorld;
+		for (int i = 0; i <= nConsElem; i++) {
+			newWorld = world + (increment * i);
+			v = { tex, r, anim, elemX, elemY, horizon, nConsElem, newWorld, vpos };
+			std::pair<int, VisualElement> pair(int(newWorld * 10), v);
+			visualElements.insert(pair);
+		}
 	}
 
 	bottomSegment = stageSegments.at(currentSegment);
@@ -305,7 +314,7 @@ bool ModuleSceneStage::Start()
 	currentSegment++;
 
 	msLog.open("log.txt");
-	
+
 	return true;
 }
 
@@ -359,43 +368,6 @@ update_status ModuleSceneStage::Update()
 	//Draw lines
 	std::vector<int> screenYPerWorldPosition;
 	std::vector<float> screenXPerWorldPosition;
-
-	std::vector<VisualElement> elementsToDraw;
-	z = zMap.at(0);
-	float minPosition = (z * 10) + App->player->position;
-	z = zMap.at(zMap.size() - 1);
-	float maxPosition = (z * 10) + App->player->position;
-	VisualElement vElem;
-
-	unsigned int n = 0;
-	vElem = elements.at(n);
-
-	while (int(vElem.worldPosition * 10) <= int(maxPosition * 10)) {
-		if (int(minPosition * 10) <= int((vElem.worldPosition + vElem.nConsecutiveElements) * 10)) {
-			elementsToDraw.push_back(vElem);
-			if (vElem.nConsecutiveElements > 0) {
-				bool insideRange = true;
-				for (int i = 1; i <= vElem.nConsecutiveElements && insideRange == true; i++) {
-					vElem.worldPosition += (float)i;
-					if (int((vElem.worldPosition * 10)) <= int((maxPosition * 10))) {
-						elementsToDraw.push_back(vElem);
-					}
-					else {
-						insideRange = false;
-					}
-					vElem.worldPosition -= (float)i;
-				}
-			}
-		}
-		n++;
-		if (n > elements.size() - 1)
-			break;
-		vElem = elements.at(n);
-	}
-
-	std::vector<bool> elementDrawn(elementsToDraw.size());
-	for (std::vector<bool>::iterator it = elementDrawn.begin(); it != elementDrawn.end(); ++it)
-		*it = false;
 
 	clock_t endDraw = clock();
 	double msDrawRoad = 0;
@@ -480,9 +452,9 @@ update_status ModuleSceneStage::Update()
 		}
 		screenYPerWorldPosition.push_back(screenY);
 
-		msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
+		//msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
 	}
-	msLog << "ms: " << msDrawRoad;
+	//msLog << "ms: " << msDrawRoad;
 	//msLog << "ms: " << msInitRoad << " + " << msDrawRoad << " + " << msEndRoad << " --- " << typeOfRoad << endl;
 	//totalDraw = msInitRoad + msDrawRoad + msEndRoad;
 	//msLog << "---------\n\t" << totalDraw << "\n------------" << endl;
@@ -491,7 +463,8 @@ update_status ModuleSceneStage::Update()
 
 	int height;
 	float width;
-	float screenFactor = 0.0f;
+	VisualElement vElem;
+	std::vector<VisualElement> elementsDrawn;
 
 	for (int i = zMap.size() - 1; i >= 0; i--) {
 		z = zMap.at(i);
@@ -500,153 +473,153 @@ update_status ModuleSceneStage::Update()
 		roadSeparation = initialRoadSeparation - (separationInterval * -(-1 + segmentFactor));
 		height = screenYPerWorldPosition.at(i);
 		width = screenXPerWorldPosition.at(i);
+		int key = int(worldPosition * 10);
+		auto range = visualElements.equal_range(key);
 
-		n = 0;
-		if (elementsToDraw.size() > 0) {
-			vElem = elementsToDraw.at(n);
-			while (n < elementsToDraw.size()) {
-				if (int(worldPosition * 10) == int(vElem.worldPosition * 10) && elementDrawn.at(n) == false) {
-					SDL_Rect rect;
-					switch (vElem.position) {
-					case VisualElementPosition::LEFT:
-						if (vElem.overHorizon == true) {
-							if (vElem.anim.frames.size() > 0) {
-								for (std::vector<VisualElement>::iterator it = elements.begin(); it != elements.end(); ++it) {
-									VisualElement* aux = &(*it);
-									if (vElem.CopyOf(*it)) {
-										App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.anim.GetCurrentFrame()), scaleFactor, scaleFactor);
-									}
+		for (auto it = range.first; it != range.second; ++it) {
+			bool drawn = false;
+			vElem = it->second;
+			for (std::vector<VisualElement>::iterator elemIt = elementsDrawn.begin(); elemIt != elementsDrawn.end(); ++elemIt) {
+				if (vElem.CopyOf(*elemIt))
+					drawn = true;
+			}
+			if (drawn == false) {
+				SDL_Rect rect;
+				switch (vElem.position) {
+				case VisualElementPosition::LEFT:
+					if (vElem.overHorizon == true) {
+						if (vElem.anim.frames.size() > 0) {
+							for (std::unordered_map<int, VisualElement>::iterator it = visualElements.begin(); it != visualElements.end(); ++it) {
+								VisualElement* aux = &(it->second);
+								if (vElem.CopyOf(it->second)) {
+									App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.anim.GetCurrentFrame()), scaleFactor, scaleFactor);
 								}
 							}
-							else {
-								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-							}
 						}
 						else {
-							if (vElem.anim.frames.size() > 0) {
-								for (std::vector<VisualElement>::iterator it = elements.begin(); it != elements.end(); ++it) {
-									VisualElement* aux = &(*it);
-									if (vElem.CopyOf(*it)) {
-										App->renderer->Blit(aux->texture, int((width + (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
-									}
+							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem.rect.h * scaleFactor) * 2) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						}
+					}
+					else {
+						if (vElem.anim.frames.size() > 0) {
+							for (std::unordered_map<int, VisualElement>::iterator it = visualElements.begin(); it != visualElements.end(); ++it) {
+								VisualElement* aux = &(it->second);
+								if (vElem.CopyOf(it->second)) {
+									App->renderer->Blit(aux->texture, int((width + (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
 								}
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-							}
-						}
-						break;
-					case VisualElementPosition::CENTER:
-						if (vElem.overHorizon == true) {
-							if (vElem.anim.frames.size() > 0) {
-								for (std::vector<VisualElement>::iterator it = elements.begin(); it != elements.end(); ++it) {
-									VisualElement* aux = &(*it);
-									if (vElem.CopyOf(*it)) {
-										App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->rect), scaleFactor, scaleFactor);
-									}
-								}
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-							}
-						}
-						else {
-							if (vElem.anim.frames.size() > 0) {
-
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-							}
-						}
-						break;
-					case VisualElementPosition::RIGHT:
-						rect = vElem.rect;
-						rect.x += rect.w;
-						App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
-						break;
-					case VisualElementPosition::LEFTANDCENTER:
-						if (vElem.overHorizon == true) {
-							if (vElem.anim.frames.size() > 0) {
-
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-							}
-						}
-						else {
-							if (vElem.anim.frames.size() > 0) {
-
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-							}
-						}
-						rect = vElem.rect;
-						rect.x += rect.w;
-						if (vElem.overHorizon == true) {
-							if (vElem.anim.frames.size() > 0) {
-
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
-							}
-						}
-						else {
-							if (vElem.anim.frames.size() > 0) {
-
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
-							}
-						}
-						break;
-					case VisualElementPosition::LEFTANDRIGHT:
-						if (vElem.overHorizon == true) {
-							if (vElem.anim.frames.size() > 0) {
-
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
 							}
 						}
 						else {
 							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
-
 						}
-						rect = vElem.rect;
-						rect.x += rect.w;
-						App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
-						break;
-					case VisualElementPosition::CENTERANDRIGHT:
-						rect = vElem.rect;
-						rect.x += rect.w;
-						if (vElem.overHorizon == true) {
-							if (vElem.anim.frames.size() > 0) {
-
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int(width / (SCREEN_SIZE * SCREEN_SIZE)), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+					}
+					break;
+				case VisualElementPosition::CENTER:
+					if (vElem.overHorizon == true) {
+						if (vElem.anim.frames.size() > 0) {
+							for (std::unordered_map<int, VisualElement>::iterator it = visualElements.begin(); it != visualElements.end(); ++it) {
+								VisualElement* aux = &(it->second);
+								if (vElem.CopyOf(it->second)) {
+									App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->rect), scaleFactor, scaleFactor);
+								}
 							}
 						}
 						else {
-							if (vElem.anim.frames.size() > 0) {
-
-							}
-							else {
-								App->renderer->Blit(vElem.texture, int((width + (roadSeparation * scaleFactor / 2)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
-							}
+							App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
 						}
-						App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
-						break;
-					case VisualElementPosition::ALL:
-						break;
 					}
-					elementDrawn.at(n) = true;
-				}
-				n++;
-				if (n > elementsToDraw.size() - 1)
+					else {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						}
+					}
 					break;
-				vElem = elementsToDraw.at(n);
+				case VisualElementPosition::RIGHT:
+					rect = vElem.rect;
+					rect.x += rect.w;
+					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+					break;
+				case VisualElementPosition::LEFTANDCENTER:
+					if (vElem.overHorizon == true) {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						}
+					}
+					else {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						}
+					}
+					rect = vElem.rect;
+					rect.x += rect.w;
+					if (vElem.overHorizon == true) {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+						}
+					}
+					else {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+						}
+					}
+					break;
+				case VisualElementPosition::LEFTANDRIGHT:
+					if (vElem.overHorizon == true) {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+						}
+					}
+					else {
+						App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(vElem.rect), scaleFactor, scaleFactor);
+
+					}
+					rect = vElem.rect;
+					rect.x += rect.w;
+					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+					break;
+				case VisualElementPosition::CENTERANDRIGHT:
+					rect = vElem.rect;
+					rect.x += rect.w;
+					if (vElem.overHorizon == true) {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int(width / (SCREEN_SIZE * SCREEN_SIZE)), int(SCREEN_HEIGHT - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+						}
+					}
+					else {
+						if (vElem.anim.frames.size() > 0) {
+
+						}
+						else {
+							App->renderer->Blit(vElem.texture, int((width + (roadSeparation * scaleFactor / 2)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem.rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+						}
+					}
+					App->renderer->Blit(vElem.texture, int(-vElem.x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem.y * (2 - scaleFactor)), &(vElem.rect), 0.5f, scaleFactor);
+					break;
+				case VisualElementPosition::ALL:
+					break;
+				}
+				elementsDrawn.push_back(vElem);
 			}
 		}
 	}
@@ -708,7 +681,7 @@ update_status ModuleSceneStage::Update()
 	double msRoad = clockToMilliseconds(endRoad - endDraw);
 	double msVisual = clockToMilliseconds(endVisual - endRoad);
 	double msAdjustments = clockToMilliseconds(endFrame - endVisual);
-	//msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
+	msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
 
 	return UPDATE_CONTINUE;
 }
