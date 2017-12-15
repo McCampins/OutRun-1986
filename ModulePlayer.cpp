@@ -199,19 +199,19 @@ update_status ModulePlayer::Update()
 			if (normalizedSpeed < 0.5f) {
 				if (normalizedSpeed > 0.05f) {
 					if (normalizedSpeed < 0.1f) {
-						App->renderer->camera.x += 6;
+						App->renderer->camera.x += 12;
 					}
 					else {
-						App->renderer->camera.x += 9;
+						App->renderer->camera.x += 18;
 					}
 				}
 			}
 			else {
 				if (normalizedSpeed > 0.75f) {
-					App->renderer->camera.x += 6;
+					App->renderer->camera.x += 12;
 				}
 				else {
-					App->renderer->camera.x += 3;
+					App->renderer->camera.x += 6;
 				}
 			}
 
@@ -225,19 +225,19 @@ update_status ModulePlayer::Update()
 			if (normalizedSpeed < 0.5f) {
 				if (normalizedSpeed > 0.05f) {
 					if (normalizedSpeed < 0.1f) {
-						App->renderer->camera.x -= 6;
+						App->renderer->camera.x -= 12;
 					}
 					else {
-						App->renderer->camera.x -= 9;
+						App->renderer->camera.x -= 18;
 					}
 				}
 			}
 			else {
 				if (normalizedSpeed > 0.75f) {
-					App->renderer->camera.x -= 6;
+					App->renderer->camera.x -= 12;
 				}
 				else {
-					App->renderer->camera.x -= 3;
+					App->renderer->camera.x -= 6;
 				}
 			}
 		}
