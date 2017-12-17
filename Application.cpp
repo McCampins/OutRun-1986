@@ -25,7 +25,7 @@ Application::Application()
 	modules.push_back(audio = new ModuleAudio());
 
 	// Game Modules
-	//modules.push_back(scene_intro = new ModuleSceneIntro(false));
+	modules.push_back(scene_intro = new ModuleSceneIntro(false));
 	modules.push_back(scene_stage = new ModuleSceneStage(false));
 	modules.push_back(player = new ModulePlayer(false));
 
@@ -55,7 +55,7 @@ bool Application::Init()
 	}
 
 	// Start the first scene --
-	fade->FadeToBlack(scene_stage, nullptr, 3.0f);
+	fade->FadeToBlack(scene_intro, nullptr, 3.0f);
 
 	return ret;
 }

@@ -34,7 +34,6 @@ public:
 public:
 	SDL_Renderer* renderer = nullptr;
 	SDL_Rect camera;
-	int initCameraX = 710;
 	//Road lines parameters
 	float leftRoadRumbleX = 0.0f;
 	float leftRoadLinesX = 0.0f;

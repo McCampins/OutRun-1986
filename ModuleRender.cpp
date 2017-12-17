@@ -37,8 +37,6 @@ bool ModuleRender::Init()
 		ret = false;
 	}
 
-	camera.x = initCameraX;
-
 	leftRoadRumbleX = -(ROADWIDTH * 1.5f) - (LINEWIDTH * 1.5f);
 	leftRoadLinesX = -(ROADWIDTH * 1.5f) - (LINEWIDTH * 1.5f);
 	rightRoadRumbleX = (ROADWIDTH * 1.5f) + (LINEWIDTH * 1.5f);

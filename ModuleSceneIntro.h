@@ -2,6 +2,7 @@
 #define __MODULESCENEINTRO_H__
 
 #include "Module.h"
+#include "Animation.h"
 
 struct SDL_Texture;
 
@@ -16,6 +17,10 @@ public:
 	bool CleanUp();
 
 public:
+	SDL_Texture* background = nullptr;	
+	SDL_Rect back;
+	Animation insertCoin;
+	Animation logo;
 };
 
 #endif // __MODULESCENEINTRO_H__

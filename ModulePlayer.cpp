@@ -16,7 +16,7 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 	// idle animation (stopped movement with no hill)
 	idle.frames.push_back({ 0, 44, 90, 41 });
 
-	//idel (stopped uphill)
+	//idle (stopped uphill)
 	idleUp.frames.push_back({ 0, 0, 90, 44 });
 
 	// forward movement with no hill
@@ -137,7 +137,6 @@ bool ModulePlayer::Start()
 
 	car = App->textures->Load("rtype/ferrari.png");
 	dustTex = App->textures->Load("rtype/dust.png");
-	startFlag = App->textures->Load("rtype/startflag.png");
 
 	return true;
 }
@@ -148,6 +147,7 @@ bool ModulePlayer::CleanUp()
 	LOG("Unloading player");
 
 	App->textures->Unload(car);
+	App->textures->Unload(dustTex);
 
 	return true;
 }

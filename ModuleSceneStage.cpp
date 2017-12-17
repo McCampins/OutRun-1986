@@ -38,11 +38,14 @@ bool ModuleSceneStage::Start()
 {
 	LOG("Loading stage scene");
 
+
 	//background = App->textures->Load("rtype/background.png");
 
 	App->player->Enable();
 	App->particles->Enable();
 	App->collision->Enable();
+
+	App->renderer->camera.x = 710;
 
 	int y = SCREEN_HEIGHT * SCREEN_SIZE;
 	int minY = SCREEN_HEIGHT * SCREEN_SIZE - ROADHEIGHTSCREEN;
