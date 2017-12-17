@@ -17,6 +17,7 @@ class ModuleParticles;
 // Game modules ---
 class ModulePlayer;
 class ModuleSceneIntro;
+class ModuleSceneMusic;
 class ModuleSceneStage;
 
 class Application
@@ -43,6 +44,7 @@ public:
 	// Game modules ---
 	ModulePlayer* player;
 	ModuleSceneIntro* scene_intro;
+	ModuleSceneMusic* scene_music;
 	ModuleSceneStage* scene_stage;
 
 private:

@@ -9,6 +9,7 @@
 #include "ModuleParticles.h"
 
 #include "ModuleSceneIntro.h"
+#include "ModuleSceneMusic.h"
 #include "ModuleSceneStage.h"
 #include "ModulePlayer.h"
 
@@ -26,6 +27,7 @@ Application::Application()
 
 	// Game Modules
 	modules.push_back(scene_intro = new ModuleSceneIntro(false));
+	modules.push_back(scene_music = new ModuleSceneMusic(false));
 	modules.push_back(scene_stage = new ModuleSceneStage(false));
 	modules.push_back(player = new ModulePlayer(false));
 

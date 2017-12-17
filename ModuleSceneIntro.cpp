@@ -58,7 +58,7 @@ update_status ModuleSceneIntro::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && App->fade->isFading() == false)
 	{
-		App->fade->FadeToBlack((Module*)App->scene_stage, this);
+		App->fade->FadeToBlack((Module*)App->scene_music, this);
 	}
 
 	return UPDATE_CONTINUE;
