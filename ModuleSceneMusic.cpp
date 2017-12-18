@@ -9,6 +9,9 @@
 
 ModuleSceneMusic::ModuleSceneMusic(bool active) : Module(active)
 {
+	breeze = { 0, 0, 651, 407 };
+	magical = { 0, 407, 651, 407 };
+	splash = { 0, 814, 651, 407 };
 }
 
 ModuleSceneMusic::~ModuleSceneMusic()
@@ -21,16 +24,55 @@ bool ModuleSceneMusic::Start()
 
 	background = App->textures->Load("rtype/musicScene.png");
 
+	magicalSound = "rtype/Music/MagicalSoundShower.mp3";
+	passingBreeze = "rtype/Music/PassingBreeze.mp3";
+	splashWave = "rtype/Music/SplashWave.mp3";
+
 	App->renderer->camera.x = App->renderer->camera.y = 0;
+
+	musicPlaying = -1;
 
 	return true;
 }
 
 update_status ModuleSceneMusic::Update()
 {
-	App->renderer->Blit(background, 0, 0, NULL, 1.0f, 0.1f);
-	//App->renderer->Blit(background, (SCREEN_WIDTH / 2) - 71, 179, &(insertCoin.GetCurrentFrame()), 1.0f, 0.31f);
-	//App->renderer->Blit(background, (SCREEN_WIDTH / 2) - 87, 30, &(logo.GetCurrentFrame()));
+	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN)
+	{
+		if (currentScreen > 0)
+			currentScreen--;
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN)
+	{
+		if (currentScreen < 2)
+			currentScreen++;
+	}
+
+	switch (currentScreen) {
+	case 0:
+		App->renderer->Blit(background, 0, 0, &breeze, 1.0f, 0.59f);
+		if (musicPlaying != currentScreen) {
+			App->audio->PlayMusic(passingBreeze, 0.0f);
+			musicPlaying = 0;
+		}
+
+		break;
+	case 1:
+		App->renderer->Blit(background, 0, 0, &magical, 1.0f, 0.59f);
+		if (musicPlaying != currentScreen) {
+			App->audio->PlayMusic(magicalSound, 0.0f);
+			musicPlaying = 1;
+		}
+		break;
+	case 2:
+		App->renderer->Blit(background, 0, 0, &splash, 1.0f, 0.59f);
+		if (musicPlaying != currentScreen) {
+			App->audio->PlayMusic(splashWave, 0.0f);
+			musicPlaying = 2;
+		}
+		break;
+	}
 
 	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && App->fade->isFading() == false)
 	{

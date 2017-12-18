@@ -18,8 +18,12 @@ public:
 
 public:
 	SDL_Texture* background = nullptr;
-	Animation radioFrequency;
-	Animation arm;
+	SDL_Rect splash, breeze, magical;
+	int musicPlaying;
+	const char* splashWave = nullptr;
+	const char* passingBreeze = nullptr;
+	const char* magicalSound = nullptr;
+	unsigned int currentScreen = 1;
 };
 
 #endif // __MODULESCENEMUSIC_H__

@@ -11,6 +11,7 @@
 #include "ModulePlayer.h"
 #include "ModuleCollision.h"
 #include "ModuleParticles.h"
+#include "ModuleSceneMusic.h"
 #include "ModuleSceneStage.h"
 
 #include "rapidjson/document.h"
@@ -37,7 +38,6 @@ double clockToMilliseconds(clock_t ticks) {
 bool ModuleSceneStage::Start()
 {
 	LOG("Loading stage scene");
-
 
 	//background = App->textures->Load("rtype/background.png");
 
