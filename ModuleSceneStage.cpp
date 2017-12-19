@@ -23,6 +23,7 @@ using namespace rapidjson;
 
 ModuleSceneStage::ModuleSceneStage(bool active) : Module(active)
 {
+	back = { 0, 0, 1200, 266 };
 }
 
 ModuleSceneStage::~ModuleSceneStage()
@@ -39,7 +40,7 @@ bool ModuleSceneStage::Start()
 {
 	LOG("Loading stage scene");
 
-	//background = App->textures->Load("rtype/background.png");
+	background = App->textures->Load("rtype/background.png");
 
 	App->player->Enable();
 	App->particles->Enable();
@@ -329,7 +330,7 @@ bool ModuleSceneStage::CleanUp()
 	for (unordered_map<std::string, SDL_Texture*>::iterator it = textures.begin(); it != textures.end(); ++it)
 		App->textures->Unload(it->second);
 
-	//App->textures->Unload(background);
+	App->textures->Unload(background);
 	App->player->Disable();
 	App->collision->Disable();
 	App->particles->Disable();
@@ -343,6 +344,11 @@ update_status ModuleSceneStage::Update()
 {
 	clock_t beginFrame = clock();
 	int typeOfRoad = 0;
+
+	//Background
+	App->renderer->Blit(background, -600, -20, &back, 0.1f, 0.7f);
+	App->renderer->Blit(background, 200, -20, &back, 0.1f, 0.7f);
+	//App->renderer->Blit(background, 600, 0, &back, 0.25f, 0.665f);
 
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;

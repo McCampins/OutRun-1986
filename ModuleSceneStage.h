@@ -106,6 +106,7 @@ public:
 public:
 	//textures
 	SDL_Texture* background = nullptr; 
+	SDL_Rect back;
 	//Road info
 	std::vector<float> zMap;
 	std::vector<float> factorMap;
