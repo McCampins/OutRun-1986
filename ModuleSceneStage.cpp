@@ -346,10 +346,11 @@ update_status ModuleSceneStage::Update()
 	int typeOfRoad = 0;
 
 	//Background
-	App->renderer->Blit(background, -600, -20, &back, 0.1f, 0.7f);
-	App->renderer->Blit(background, 200, -20, &back, 0.1f, 0.7f);
-	//App->renderer->Blit(background, 600, 0, &back, 0.25f, 0.665f);
-
+	int diff = (previousYTopRoad - 520);
+	int adj = int(diff * 0.335f);
+	App->renderer->Blit(background, -600, -11 + adj, &back, 0.1f, 0.7f);
+	App->renderer->Blit(background, 200, -11 + adj, &back, 0.1f, 0.7f);
+	
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
 	int screenY = SCREEN_HEIGHT * SCREEN_SIZE;
@@ -370,6 +371,7 @@ update_status ModuleSceneStage::Update()
 	if (topSegment.yMapPosition < 1.0f) {
 		topSegment.yMapPosition = 0.0f;
 	}
+
 	float segmentFactor = topSegment.yMapPosition / zMap.size();
 
 	bool inTopSegment = false;
@@ -467,6 +469,8 @@ update_status ModuleSceneStage::Update()
 	//msLog << "ms: " << msInitRoad << " + " << msDrawRoad << " + " << msEndRoad << " --- " << typeOfRoad << endl;
 	//totalDraw = msInitRoad + msDrawRoad + msEndRoad;
 	//msLog << "---------\n\t" << totalDraw << "\n------------" << endl;
+	
+	previousYTopRoad = screenY;
 
 	clock_t endRoad = clock();
 

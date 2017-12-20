@@ -117,6 +117,7 @@ public:
 	int curveCameraMove = 0;
 	bool leftTireOut = false;
 	bool rigthTireOut = false;
+	unsigned int previousYTopRoad = 0;
 	//Visual elements info
 	std::unordered_map<std::string, SDL_Texture*> textures;
 	std::unordered_multimap<int, VisualElement> visualElements;
