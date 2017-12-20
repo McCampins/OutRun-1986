@@ -361,7 +361,7 @@ update_status ModuleSceneStage::Update()
 	int adj = int(diff * 0.335f);
 	App->renderer->Blit(background, -600, -11 + adj, &back, 0.1f, 0.7f);
 	App->renderer->Blit(background, 200, -11 + adj, &back, 0.1f, 0.7f);
-	
+
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
 	int screenY = SCREEN_HEIGHT * SCREEN_SIZE;
@@ -481,7 +481,7 @@ update_status ModuleSceneStage::Update()
 	//msLog << "ms: " << msInitRoad << " + " << msDrawRoad << " + " << msEndRoad << " --- " << typeOfRoad << endl;
 	//totalDraw = msInitRoad + msDrawRoad + msEndRoad;
 	//msLog << "---------\n\t" << totalDraw << "\n------------" << endl;
-	
+
 	previousYTopRoad = screenY;
 
 	clock_t endRoad = clock();
@@ -517,20 +517,26 @@ update_status ModuleSceneStage::Update()
 		if (vehicles.size() > 0) {
 			unsigned int idx = 0;
 			vElem = vehicles.at(idx);
-			while (vElem.world <= int(worldPosition * 10)) {
-				if (vElem.world == int(worldPosition * 10)) {
+			while (int(vElem.world * 10) <= int(worldPosition * 10)) {
+				if (int(vElem.world * 10) == int(worldPosition * 10)) {
 					bool drawn = false;
 					for (std::vector<VisualElement>::iterator elemIt = elementsDrawn.begin(); elemIt != elementsDrawn.end(); ++elemIt) {
 						if (vElem.CopyOf(*elemIt))
 							drawn = true;
 					}
 					if (drawn == false) {
-						DrawVisualElement(vElem, width, height, scaleFactor, roadSeparation);
+						DrawVehicle(vElem, width, height, scaleFactor, roadSeparation);
 						elementsDrawn.push_back(vElem);
 					}
 				}
 				idx++;
-				vElem = vehicles.at(idx);
+				if (idx < vehicles.size()) {
+					vElem = vehicles.at(idx);				
+				}
+				else {
+					break;
+				}
+
 			}
 		}
 	}
@@ -808,6 +814,51 @@ void ModuleSceneStage::DrawVisualElement(VisualElement vElem, float width, int h
 	}
 }
 
+void ModuleSceneStage::DrawVehicle(VisualElement vElem, float width, int height, float scaleFactor, float roadSeparation)
+{
+	unsigned int vehicleLane = 0;
+	switch (vElem.x) {
+	case -1300:
+		vehicleLane = 1;
+		break;
+	case -825:
+		vehicleLane = 2;
+		break;
+	}
+
+	int carIdx = 0;
+	int difBetweenLanes = currentLane - vehicleLane;
+	switch (difBetweenLanes) {
+	case -1:
+		carIdx = 3;
+		break;
+	case -2:
+		carIdx = 4;
+		break;
+	case -3:
+	case -4:
+	case -5:
+		carIdx = 5;
+		break;
+	case 0:
+	case 1:
+		carIdx = 0;
+		break;
+	case 2:
+		carIdx = 1;
+		break;
+	case 3:
+	case 4:
+	case 5:
+		carIdx = 2;
+		break;
+	}
+
+	SDL_Rect rect = vElem.anim.frames.at(carIdx);
+	App->renderer->Blit(vElem.texture, int((width + (vElem.x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (rect.h * scaleFactor) - vElem.y), &(rect), scaleFactor, scaleFactor);
+
+}
+
 bool ModuleSceneStage::CheckLeftTire(float x, float scaleFactor, float roadSeparation)
 {
 	bool ret = false;
@@ -876,7 +927,7 @@ bool ModuleSceneStage::CheckRightTire(float x, float scaleFactor, float roadSepa
 
 unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadSeparation)
 {
-	int carX = (App->player->carX * SCREEN_SIZE) + App->renderer->camera.x;		
+	int carX = (App->player->carX * SCREEN_SIZE) + App->renderer->camera.x;
 	float drawX = x + App->renderer->camera.x * scaleFactor;
 	float aux = ((drawX + ((App->renderer->fifthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2));
 
@@ -887,7 +938,7 @@ unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadS
 		return 2;
 	}
 	else if (carX < ((drawX + ((App->renderer->fourthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
- 		return 3;
+		return 3;
 	}
 	else if (carX < ((drawX + ((App->renderer->fifthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
 		return 4;

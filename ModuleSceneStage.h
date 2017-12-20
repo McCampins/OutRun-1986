@@ -102,6 +102,7 @@ public:
 	bool CleanUp();
 
 	void DrawVisualElement(VisualElement vElem, float width, int height, float scaleFactor, float roadSeparation);
+	void DrawVehicle(VisualElement vElem, float width, int height, float scaleFactor, float roadSeparation);
 
 	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation);
 	bool CheckRightTire(float x, float scaleFactor, float roadSeparation);
