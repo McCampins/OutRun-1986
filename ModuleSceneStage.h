@@ -105,6 +105,7 @@ public:
 
 	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation);
 	bool CheckRightTire(float x, float scaleFactor, float roadSeparation);
+	unsigned int CheckLane(float x, float scaleFactor, float roadSeparation);
 
 public:
 	//textures
@@ -127,6 +128,8 @@ public:
 	std::vector<VisualElement> vehicles;
 	//Performance log
 	ofstream msLog;
+	//car player info
+	unsigned int currentLane = 0;
 };
 
 #endif // __MODULESCENESTAGE_H__

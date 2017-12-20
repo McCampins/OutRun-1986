@@ -471,6 +471,7 @@ update_status ModuleSceneStage::Update()
 		if (screenY == (SCREEN_HEIGHT - 8) * SCREEN_SIZE) {
 			leftTireOut = CheckLeftTire(x, scaleFactor, roadSeparation);
 			rigthTireOut = CheckRightTire(x, scaleFactor, roadSeparation);
+			currentLane = CheckLane(x, scaleFactor, roadSeparation);
 		}
 		screenYPerWorldPosition.push_back(screenY);
 
@@ -871,5 +872,31 @@ bool ModuleSceneStage::CheckRightTire(float x, float scaleFactor, float roadSepa
 		ret = false;
 	}
 	return ret;
+}
+
+unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadSeparation)
+{
+	int carX = (App->player->carX * SCREEN_SIZE) + App->renderer->camera.x;		
+	float drawX = x + App->renderer->camera.x * scaleFactor;
+	float aux = ((drawX + ((App->renderer->fifthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2));
+
+	if (carX < ((drawX + (App->renderer->secondRoadX * scaleFactor)) - (ROADWIDTH / 2))) {
+		return 1;
+	}
+	else if (carX < ((drawX + (App->renderer->thirdRoadX * scaleFactor)) - (ROADWIDTH / 2))) {
+		return 2;
+	}
+	else if (carX < ((drawX + ((App->renderer->fourthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
+ 		return 3;
+	}
+	else if (carX < ((drawX + ((App->renderer->fifthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
+		return 4;
+	}
+	else if (carX < ((drawX + ((App->renderer->sixthRoadX + roadSeparation)  * scaleFactor)) - (ROADWIDTH / 2))) {
+		return 5;
+	}
+	else {
+		return 6;
+	}
 }
 

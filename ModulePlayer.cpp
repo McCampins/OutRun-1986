@@ -412,8 +412,9 @@ update_status ModulePlayer::Update()
 	position += playerSpeed;
 	curveSpeed = playerSpeed * 10;
 
+	carX = ((SCREEN_WIDTH - 92) / 2) - (App->renderer->camera.x / SCREEN_SIZE);
 	//Draw car and player
-	App->renderer->Blit(car, ((SCREEN_WIDTH - 92) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
+	App->renderer->Blit(car, carX, SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
 	if (playerSpeed > 0.0f) {
 		App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayerMoving.GetCurrentFrame()));
 		App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayerMoving.GetCurrentFrame()));

@@ -62,6 +62,9 @@ public:
 	float position = 0.0f;
 	float playerSpeed = 0.0f;
 	float curveSpeed = 0.0f;
+
+	unsigned int currentLane = 0;
+	int carX = 0;
 };
 
 #endif
