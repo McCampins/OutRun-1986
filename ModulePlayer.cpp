@@ -182,8 +182,8 @@ update_status ModulePlayer::Update()
 	float normalizedSpeed = 0.0f;
 
 	//Get the segment to know its inclination
-	Segment s;
-	if (App->scene_stage->topSegment.yMapPosition < 55) {
+	Segment* s;
+	if (App->scene_stage->topSegment->yMapPosition < 55) {
 		s = App->scene_stage->topSegment;
 	}
 	else {
@@ -247,7 +247,7 @@ update_status ModulePlayer::Update()
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 	{
 		keysPressed += 4;
-		switch (s.inc) {
+		switch (s->inc) {
 		case Inclination::UP:
 			if (keyPressed(0, keysPressed)) {
 				currentCar = &breakUpLeft;
@@ -289,7 +289,7 @@ update_status ModulePlayer::Update()
 	if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
 	{
 		keysPressed += 8;
-		switch (s.inc) {
+		switch (s->inc) {
 		case Inclination::UP:
 			if (keyPressed(0, keysPressed)) {
 				currentCar = &leftUp;
@@ -330,7 +330,7 @@ update_status ModulePlayer::Update()
 	//If no key is pressed, decrement speed
 	if (keyPressed(2, keysPressed) == false && keyPressed(3, keysPressed) == false) {
 		playerSpeed -= ACCELERATION / 2;
-		switch (s.inc) {
+		switch (s->inc) {
 		case Inclination::UP:
 			if (keyPressed(0, keysPressed)) {
 				currentCar = &leftUp;
@@ -371,7 +371,7 @@ update_status ModulePlayer::Update()
 		if (keyPressed(0, keysPressed)) {
 			playersDx = 4;
 
-			switch (s.inc) {
+			switch (s->inc) {
 			case Inclination::UP:
 				currentCar = &idleUpLeft;
 				break;
@@ -384,7 +384,7 @@ update_status ModulePlayer::Update()
 		else if (keyPressed(1, keysPressed)) {
 			playersDx = -4;
 
-			switch (s.inc) {
+			switch (s->inc) {
 			case Inclination::UP:
 				currentCar = &idleUpRight;
 				break;
@@ -397,7 +397,7 @@ update_status ModulePlayer::Update()
 		else {
 			playersDx = 0;
 
-			switch (s.inc) {
+			switch (s->inc) {
 			case Inclination::UP:
 				currentCar = &idleUp;
 				break;

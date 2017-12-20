@@ -65,26 +65,26 @@ struct VisualElement {
 	VisualElement(SDL_Texture* texture, SDL_Rect rect, Animation anim, int x, int y, bool overHorizon, float speed, int nConsecutiveElements, float world, VisualElementPosition position) :
 		texture(texture), rect(rect), anim(anim), x(x), y(y), overHorizon(overHorizon), speed(speed), nConsecutiveElements(nConsecutiveElements), world(world), position(position) {};
 
-	bool CopyOf(VisualElement ve) {
-		if (rect.x != ve.rect.x || rect.y != ve.rect.y || rect.w != ve.rect.w || rect.h != ve.rect.h)
+	bool CopyOf(VisualElement* ve) {
+		if (rect.x != ve->rect.x || rect.y != ve->rect.y || rect.w != ve->rect.w || rect.h != ve->rect.h)
 			return false;
 
-		if (x != ve.x)
+		if (x != ve->x)
 			return false;
 
-		if (y != ve.y)
+		if (y != ve->y)
 			return false;
 
-		if (overHorizon != ve.overHorizon)
+		if (overHorizon != ve->overHorizon)
 			return false;
 
-		if (nConsecutiveElements != ve.nConsecutiveElements)
+		if (nConsecutiveElements != ve->nConsecutiveElements)
 			return false;
 
-		if (int(world * 10) != int(ve.world * 10))
+		if (int(world * 10) != int(ve->world * 10))
 			return false;
 
-		if (position != ve.position)
+		if (position != ve->position)
 			return false;
 
 		return true;
@@ -101,8 +101,8 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	void DrawVisualElement(VisualElement vElem, float width, int height, float scaleFactor, float roadSeparation);
-	void DrawVehicle(VisualElement vElem, float width, int height, float scaleFactor, float roadSeparation);
+	void DrawVisualElement(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation);
+	void DrawVehicle(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation);
 
 	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation);
 	bool CheckRightTire(float x, float scaleFactor, float roadSeparation);
@@ -115,18 +115,18 @@ public:
 	//Road info
 	std::vector<float> zMap;
 	std::vector<float> factorMap;
-	std::vector<Segment> stageSegments;
+	std::vector<Segment*> stageSegments;
 	unsigned int currentSegment = 0;
-	Segment topSegment;
-	Segment bottomSegment;
+	Segment* topSegment;
+	Segment* bottomSegment;
 	int curveCameraMove = 0;
 	bool leftTireOut = false;
 	bool rigthTireOut = false;
 	unsigned int previousYTopRoad = 0;
 	//Visual elements info
 	std::unordered_map<std::string, SDL_Texture*> textures;
-	std::unordered_multimap<int, VisualElement> staticVisualElements;
-	std::vector<VisualElement> vehicles;
+	std::unordered_multimap<int, VisualElement*> staticVisualElements;
+	std::vector<VisualElement*> vehicles;
 	//Performance log
 	ofstream msLog;
 	//car player info
