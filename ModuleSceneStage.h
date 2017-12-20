@@ -56,13 +56,14 @@ struct VisualElement {
 	int x;
 	int y;
 	bool overHorizon;
+	float speed;
 	int nConsecutiveElements;
 	float world;
 	VisualElementPosition position;
 
 	VisualElement() {};
-	VisualElement(SDL_Texture* texture, SDL_Rect rect, Animation anim, int x, int y, bool overHorizon, int nConsecutiveElements, float world, VisualElementPosition position) :
-		texture(texture), rect(rect), anim(anim), x(x), y(y), overHorizon(overHorizon), nConsecutiveElements(nConsecutiveElements), world(world), position(position) {};
+	VisualElement(SDL_Texture* texture, SDL_Rect rect, Animation anim, int x, int y, bool overHorizon, float speed, int nConsecutiveElements, float world, VisualElementPosition position) :
+		texture(texture), rect(rect), anim(anim), x(x), y(y), overHorizon(overHorizon), speed(speed), nConsecutiveElements(nConsecutiveElements), world(world), position(position) {};
 
 	bool CopyOf(VisualElement ve) {
 		if (rect.x != ve.rect.x || rect.y != ve.rect.y || rect.w != ve.rect.w || rect.h != ve.rect.h)
@@ -100,6 +101,8 @@ public:
 	update_status Update();
 	bool CleanUp();
 
+	void DrawVisualElement(VisualElement vElem, float width, int height, float scaleFactor, float roadSeparation);
+
 	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation);
 	bool CheckRightTire(float x, float scaleFactor, float roadSeparation);
 
@@ -120,7 +123,8 @@ public:
 	unsigned int previousYTopRoad = 0;
 	//Visual elements info
 	std::unordered_map<std::string, SDL_Texture*> textures;
-	std::unordered_multimap<int, VisualElement> visualElements;
+	std::unordered_multimap<int, VisualElement> staticVisualElements;
+	std::vector<VisualElement> vehicles;
 	//Performance log
 	ofstream msLog;
 };
