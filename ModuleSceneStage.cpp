@@ -335,10 +335,30 @@ bool ModuleSceneStage::Start()
 // UnLoad assets
 bool ModuleSceneStage::CleanUp()
 {
-	LOG("Unloading space scene");
+	LOG("Unloading stage scene");
+	
+	for (std::vector<Segment*>::iterator it = stageSegments.begin(); it != stageSegments.end(); ++it)
+		delete *it;
+
+	stageSegments.clear();
+
+	topSegment = nullptr;
+	bottomSegment = nullptr;
 
 	for (unordered_map<std::string, SDL_Texture*>::iterator it = textures.begin(); it != textures.end(); ++it)
 		App->textures->Unload(it->second);
+
+	textures.clear();
+
+	for (unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it)
+		delete it->second;
+
+	staticVisualElements.clear();
+
+	for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it)
+		delete *it;
+
+	vehicles.clear();
 
 	App->textures->Unload(background);
 	App->player->Disable();
@@ -394,6 +414,7 @@ update_status ModuleSceneStage::Update()
 
 	clock_t endDraw = clock();
 	double msDrawRoad = 0;
+	double msChecks = 0;
 	for (unsigned int i = 0; i < zMap.size(); i++) {
 		z = zMap.at(i);
 
@@ -476,12 +497,12 @@ update_status ModuleSceneStage::Update()
 		}
 		screenYPerWorldPosition.push_back(screenY);
 
-		//msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
+		clock_t endCheck = clock();
+
+		msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
+		msChecks += clockToMilliseconds(endCheck - roadDraw);
 	}
-	//msLog << "ms: " << msDrawRoad;
-	//msLog << "ms: " << msInitRoad << " + " << msDrawRoad << " + " << msEndRoad << " --- " << typeOfRoad << endl;
-	//totalDraw = msInitRoad + msDrawRoad + msEndRoad;
-	//msLog << "---------\n\t" << totalDraw << "\n------------" << endl;
+	msLog << "ms: " << msDrawRoad << "---" << msChecks << endl;
 
 	previousYTopRoad = screenY;
 
@@ -491,7 +512,7 @@ update_status ModuleSceneStage::Update()
 	float width;
 	VisualElement* vElem;
 	std::vector<VisualElement*> elementsDrawn;
-
+	
 	for (int i = zMap.size() - 1; i >= 0; i--) {
 		z = zMap.at(i);
 		scaleFactor = factorMap.at(i);
@@ -593,6 +614,19 @@ update_status ModuleSceneStage::Update()
 		}
 	}
 
+	//Delete all visual elements that have been surpassed by the player
+	if (staticVisualElements.size() > 0) {
+		int startingWorld = staticVisualElements.begin()->first; //starting world position
+		int minWorld = int(((zMap.at(0) * 10) + App->player->position) * 10); //minimum world position seen on screen
+
+		for (int i = startingWorld; i < minWorld; i++) {
+			staticVisualElements.erase(i);
+		}
+	}
+
+
+
+
 	//Update visual elements world position
 	for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it) {
 		VisualElement* aux = *it;
@@ -607,7 +641,7 @@ update_status ModuleSceneStage::Update()
 	double msRoad = clockToMilliseconds(endRoad - endDraw);
 	double msVisual = clockToMilliseconds(endVisual - endRoad);
 	double msAdjustments = clockToMilliseconds(endFrame - endVisual);
-	msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
+	//msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
 
 	return UPDATE_CONTINUE;
 }
@@ -825,6 +859,17 @@ void ModuleSceneStage::DrawVehicle(VisualElement* vElem, float width, int height
 	case -825:
 		vehicleLane = 2;
 		break;
+	case -350:
+		vehicleLane = 3;
+		break;
+	case 125:
+		vehicleLane = 4;
+		break;
+	case 600:
+		vehicleLane = 5;
+		break;
+	case 1075:
+		vehicleLane = 6;
 	}
 
 	int carIdx = 0;
@@ -856,8 +901,12 @@ void ModuleSceneStage::DrawVehicle(VisualElement* vElem, float width, int height
 	}
 
 	SDL_Rect rect = vElem->anim.frames.at(carIdx);
-	App->renderer->Blit(vElem->texture, int((width + (vElem->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
-
+	if (vElem->x < 125) {
+		App->renderer->Blit(vElem->texture, int((width + (vElem->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
+	}
+	else {
+		App->renderer->Blit(vElem->texture, int(((width + ((vElem->x * scaleFactor))) + (roadSeparation * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
+	}
 }
 
 bool ModuleSceneStage::CheckLeftTire(float x, float scaleFactor, float roadSeparation)
@@ -930,7 +979,6 @@ unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadS
 {
 	int carX = (App->player->carX * SCREEN_SIZE) + App->renderer->camera.x;
 	float drawX = x + App->renderer->camera.x * scaleFactor;
-	float aux = ((drawX + ((App->renderer->fifthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2));
 
 	if (carX < ((drawX + (App->renderer->secondRoadX * scaleFactor)) - (ROADWIDTH / 2))) {
 		return 1;
