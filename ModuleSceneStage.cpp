@@ -496,13 +496,13 @@ update_status ModuleSceneStage::Update()
 			currentLane = CheckLane(x, scaleFactor, roadSeparation);
 		}
 		screenYPerWorldPosition.push_back(screenY);
-
+		
 		clock_t endCheck = clock();
 
 		msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
 		msChecks += clockToMilliseconds(endCheck - roadDraw);
 	}
-	msLog << "ms: " << msDrawRoad << "---" << msChecks << endl;
+	//msLog << "ms: " << msDrawRoad << "---" << msChecks << endl;
 
 	previousYTopRoad = screenY;
 
@@ -624,9 +624,6 @@ update_status ModuleSceneStage::Update()
 		}
 	}
 
-
-
-
 	//Update visual elements world position
 	for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it) {
 		VisualElement* aux = *it;
@@ -641,7 +638,7 @@ update_status ModuleSceneStage::Update()
 	double msRoad = clockToMilliseconds(endRoad - endDraw);
 	double msVisual = clockToMilliseconds(endVisual - endRoad);
 	double msAdjustments = clockToMilliseconds(endFrame - endVisual);
-	//msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
+	msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
 
 	return UPDATE_CONTINUE;
 }

@@ -410,6 +410,49 @@ update_status ModulePlayer::Update()
 			}
 		}
 
+		//Check if colision
+		unsigned int size = App->scene_stage->vehicles.size();
+		float carPosition = 6.0f + position;
+		if (size > 0) {
+			unsigned int idx = 0;
+			VisualElement* vElem = App->scene_stage->vehicles.at(idx);
+			while (int(vElem->world * 10) <= int(carPosition * 10)) {
+				if (int(vElem->world * 10) == int(carPosition * 10)) {
+					unsigned int vehicleLane = 0;
+					switch (vElem->x) {
+					case -1300:
+						vehicleLane = 1;
+						break;
+					case -825:
+						vehicleLane = 2;
+						break;
+					case -350:
+						vehicleLane = 3;
+						break;
+					case 125:
+						vehicleLane = 4;
+						break;
+					case 600:
+						vehicleLane = 5;
+						break;
+					case 1075:
+						vehicleLane = 6;
+					}
+					if (vehicleLane == App->scene_stage->currentLane) {
+						playerSpeed = 0;
+						break;
+					}
+				}
+				idx++;
+				if (idx < size) {
+					vElem = App->scene_stage->vehicles.at(idx);
+				}
+				else {
+					break;
+				}
+			}
+		}
+
 		position += playerSpeed;
 		curveSpeed = playerSpeed * 10;
 
