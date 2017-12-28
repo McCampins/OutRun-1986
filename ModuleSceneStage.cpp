@@ -974,7 +974,7 @@ bool ModuleSceneStage::CheckRightTire(float x, float scaleFactor, float roadSepa
 
 unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadSeparation)
 {
-	int carX = (App->player->carX * SCREEN_SIZE) + App->renderer->camera.x;
+	int carX = (App->player->carX * SCREEN_SIZE) + App->renderer->camera.x + 95;
 	float drawX = x + App->renderer->camera.x * scaleFactor;
 
 	if (carX < ((drawX + (App->renderer->secondRoadX * scaleFactor)) - (ROADWIDTH / 2))) {
