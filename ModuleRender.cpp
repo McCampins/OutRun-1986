@@ -62,7 +62,7 @@ update_status ModuleRender::PreUpdate()
 update_status ModuleRender::Update()
 {
 	// debug camera
-	
+
 	int curveSpeed = 3;
 
 	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
@@ -76,7 +76,7 @@ update_status ModuleRender::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 		camera.x -= curveSpeed;
-	
+
 
 	return UPDATE_CONTINUE;
 }
@@ -131,20 +131,28 @@ bool ModuleRender::Blit(SDL_Texture* texture, int x, int y, SDL_Rect* section, f
 	return ret;
 }
 
-void Print(const Font* font, const int x, const int y, const string text)
+bool ModuleRender::Print(const Font* font, const int x, const int y, const string text)
 {
-	SDL_Rect* rect;
+	bool ret = true;
+	SDL_Rect rect1, rect2;
 	for (unsigned int i = 0; i < text.length(); i++)
 	{
-		rect = new SDL_Rect();
-		rect->h = fontHeight;
-		rect->w = fontWidth;
-		rect->x = x + i * fontWidth;
-		rect->y = y;
+		rect1.h = int(fontHeight);
+		rect1.w = int(fontWidth);
+		rect1.x = int(x + i * fontWidth);
+		rect1.y = y;
 		char c = text.at(i);
-		if (asciiBegin < c && c < asciiEnd)
-			SDL_BlitSurface(font->fontSurface, &(font->traductionTable.at(c)), App->window->screen_surface, rect);
+		rect2 = *(font->traductionTable.at(c));
+		if (asciiBegin <= c && c <= asciiEnd) {
+			if (SDL_RenderCopy(renderer, font->fontSurface, &rect2, &rect1) != 0)
+			{
+				LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
+				ret = false;
+			}
+		}
 	}
+
+	return ret;
 }
 
 bool ModuleRender::DrawRect(const SDL_Rect & rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool use_camera)
@@ -209,7 +217,7 @@ bool ModuleRender::DrawHorizontalLine(int x, int y, int w, Uint8 r, Uint8 g, Uin
 
 int ModuleRender::DrawRoads(int screenY, float worldPosition, float scaleFactor, float x, float roadSeparation, int times) {
 	float drawX = x + camera.x * scaleFactor;
-	
+
 	if ((int)worldPosition % 2 == 0)
 	{
 		for (int i = 0; i < times; i++) {

@@ -29,7 +29,6 @@ ModuleSceneStage::ModuleSceneStage(bool active) : Module(active)
 	back = { 0, 0, 1200, 266 };
 	timeR = { 0, 0, 67, 35 };
 	scoreR = { 0, 0, 76, 36 };
-	lapR = { 0, 0, 59, 28 };
 }
 
 ModuleSceneStage::~ModuleSceneStage()
@@ -56,7 +55,7 @@ bool ModuleSceneStage::Start()
 	fm = new FontManager();
 
 	fm->Init();
-	font = fm->Allocate("greenfont.bmp", __FILE__, to_string(__LINE__));
+	greenFont = fm->Allocate("greenfont.bmp", __FILE__, to_string(__LINE__));
 
 	App->player->Enable();
 
@@ -387,7 +386,7 @@ bool ModuleSceneStage::CleanUp()
 	leftTireOut = false;
 	rigthTireOut = false;
 	firstDraw = true;
-	timeLeft = 65;
+	timeToFinish = 65;
 	secondsPassed = 0;
 	timeToStart = 4;
 	startRace = nullptr;
@@ -398,7 +397,7 @@ bool ModuleSceneStage::CleanUp()
 	fm->Release("greenfont.bmp");
 	fm->End();
 	fm = nullptr;
-	font = nullptr;
+	greenFont = nullptr;
 
 	msLog.close();
 	return true;
@@ -409,12 +408,16 @@ bool compareVisualElements(VisualElement* i, VisualElement* j) { return (i->worl
 // Update: draw background
 update_status ModuleSceneStage::Update()
 {
+	secondsPassed = (clock() - startTimer) / CLOCKS_PER_SEC;
+
 	if (gameState == GameState::STARTING) {
-		secondsPassed = (clock() - startTimer) / CLOCKS_PER_SEC;
 		if (secondsPassed >= timeToStart)
 		{
+			startTimer = clock();
 			gameState = GameState::PLAYING;
 		}
+
+		App->renderer->Print(greenFont, 200, 20, to_string(timeToFinish));
 	}
 
 	clock_t beginFrame = clock();
@@ -428,8 +431,7 @@ update_status ModuleSceneStage::Update()
 
 	//UI
 	App->renderer->Blit(time, 10, 5, &timeR, 0.0f, 0.75f);
-	App->renderer->Blit(score, 110, 5, &scoreR, 0.0f, 0.75f);
-	App->renderer->Blit(lap, 240, 8, &lapR, 0.0f, 0.75f);
+	App->renderer->Blit(score, 180, 5, &scoreR, 0.0f, 0.75f);
 
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
@@ -613,7 +615,7 @@ update_status ModuleSceneStage::Update()
 
 	clock_t endVisual = clock();
 
-	if (gameState == GameState::PLAYING) {
+	if (gameState == GameState::PLAYING  || gameState == GameState::GAMEOVER) {
 		//Update segments
 		App->renderer->camera.x += curveCameraMove;
 		topSegment->yMapPosition -= App->player->curveSpeed;
@@ -701,9 +703,17 @@ update_status ModuleSceneStage::Update()
 		double msVisual = clockToMilliseconds(endVisual - endRoad);
 		double msAdjustments = clockToMilliseconds(endFrame - endVisual);
 		msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
+		
+		double timeLeft = timeToFinish - secondsPassed;
+		if (timeLeft < 0) {
+			timeLeft = 0;
+			gameState = GameState::GAMEOVER;
+		}
+
+		App->renderer->Print(greenFont, 200, 20, to_string(int(timeLeft)));
 	}
 
-	if (gameState == GameState::ENDING) {
+	if (gameState == GameState::ENDING || gameState == GameState::GAMEOVER) {
 		if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && App->fade->isFading() == false) {
 			App->fade->FadeToBlack((Module*)App->scene_intro, this);
 		}

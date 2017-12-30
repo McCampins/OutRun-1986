@@ -471,18 +471,28 @@ update_status ModulePlayer::Update()
 		position += playerSpeed;
 		curveSpeed = playerSpeed * 10;
 		break;
-	case GameState::ENDING:
-		if (playerSpeed > 0.0f) 
+	case GameState::GAMEOVER:
+		if (playerSpeed > 0.0f)
 			playerSpeed -= ACCELERATION;
 
 		if (playerSpeed < 0.0f)
 			playerSpeed = 0.0f;
 
 		position += playerSpeed;
-		curveSpeed = playerSpeed * 10;	
+		curveSpeed = playerSpeed * 10;
+		break;
+	case GameState::ENDING:
+		if (playerSpeed > 0.0f)
+			playerSpeed -= ACCELERATION;
+
+		if (playerSpeed < 0.0f)
+			playerSpeed = 0.0f;
+
+		position += playerSpeed;
+		curveSpeed = playerSpeed * 10;
 
 		if (App->renderer->camera.x > 0) {
-			App->renderer->camera.x -= 12; 
+			App->renderer->camera.x -= 12;
 			if (App->renderer->camera.x < 0)
 				App->renderer->camera.x = 0;
 		}

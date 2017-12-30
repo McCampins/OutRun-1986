@@ -50,7 +50,7 @@ bool FontManager::Init() {
 	{
 		font = new Font();
 		string fontName = replaceBackslashes(*it);
-		ret = font->Init(fontName, "abcdefghijklmnopqrstuvwxyz1234567890.'");
+		ret = font->Init(fontName, "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.,@");
 		if (ret)
 		{
 			fontNames.push_back(fontName);
@@ -66,12 +66,11 @@ const Font * FontManager::Allocate(const string font, const string file, const s
 	bool fontFound = false;
 	int fontIndex = 0;
 
-	string path = "config/fonts/" + font;
-	string f;
+	string path = "config/fonts/";
+	string f = path + font;
 
 	for (list<string>::const_iterator it = fontNames.begin(); it != fontNames.cend() && fontFound == false; ++it)
 	{
-		f = replaceBackslashes(path);
 		if ((*it).compare(f) == 0)
 		{
 			fontFound = true;
@@ -150,7 +149,5 @@ void FontManager::End()
 		}
 		fontPointers.clear();
 	}
-
-
 }
 

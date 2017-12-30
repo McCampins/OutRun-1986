@@ -3,8 +3,8 @@
 
 #define asciiBegin 33
 #define asciiEnd 126
-#define fontWidth 9
-#define fontHeight 15
+#define fontWidth 76.6
+#define fontHeight 70
 
 #include "SDL/include/SDL.h"
 #include <map>
@@ -22,9 +22,10 @@ public:
 	void End();
 
 public:
-	SDL_Surface* fontSurface = nullptr;
+	SDL_Texture* fontSurface = nullptr;
 	string traductionString;
-	std::map<char, SDL_Rect> traductionTable;
+	std::map<char, SDL_Rect*> traductionTable;
 };
+
 
 #endif
