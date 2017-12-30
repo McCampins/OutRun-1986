@@ -62,6 +62,7 @@ update_status ModuleRender::PreUpdate()
 update_status ModuleRender::Update()
 {
 	// debug camera
+	
 	int curveSpeed = 3;
 
 	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
@@ -75,6 +76,7 @@ update_status ModuleRender::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 		camera.x -= curveSpeed;
+	
 
 	return UPDATE_CONTINUE;
 }
@@ -127,6 +129,22 @@ bool ModuleRender::Blit(SDL_Texture* texture, int x, int y, SDL_Rect* section, f
 	}
 
 	return ret;
+}
+
+void Print(const Font* font, const int x, const int y, const string text)
+{
+	SDL_Rect* rect;
+	for (unsigned int i = 0; i < text.length(); i++)
+	{
+		rect = new SDL_Rect();
+		rect->h = fontHeight;
+		rect->w = fontWidth;
+		rect->x = x + i * fontWidth;
+		rect->y = y;
+		char c = text.at(i);
+		if (asciiBegin < c && c < asciiEnd)
+			SDL_BlitSurface(font->fontSurface, &(font->traductionTable.at(c)), App->window->screen_surface, rect);
+	}
 }
 
 bool ModuleRender::DrawRect(const SDL_Rect & rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool use_camera)

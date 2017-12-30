@@ -24,7 +24,6 @@ public:
 public:
 	SDL_Texture* car = nullptr;
 	SDL_Texture* dustTex = nullptr;
-	SDL_Texture* startFlag = nullptr;
 
 	Animation* currentCar = nullptr;
 

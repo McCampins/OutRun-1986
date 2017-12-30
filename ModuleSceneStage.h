@@ -11,7 +11,7 @@
 #define UPHILL 1.0f
 #define DOWNHILL -1.0f
 
-#define VISUALELEMENTDISTANCE 2.0f
+#define STARTINGCAMERA 710
 
 #include <cmath>
 #include <unordered_map>
@@ -21,6 +21,7 @@
 #include "Module.h"
 
 struct SDL_Texture;
+class FontManager;
 
 enum class Inclination {
 	UP,
@@ -36,6 +37,13 @@ enum class VisualElementPosition {
 	LEFTANDCENTER,
 	CENTERANDRIGHT,
 	ALL
+};
+
+enum class GameState {
+	STARTING,
+	PLAYING,
+	GAMEOVER,
+	ENDING
 };
 
 struct Segment {
@@ -110,8 +118,16 @@ public:
 
 public:
 	//textures
-	SDL_Texture* background = nullptr; 
+	SDL_Texture* background = nullptr;
+	SDL_Texture* time = nullptr;
+	SDL_Texture* score = nullptr;
+	SDL_Texture* lap = nullptr;
 	SDL_Rect back;
+	SDL_Rect timeR;
+	SDL_Rect scoreR;
+	SDL_Rect lapR;
+	FontManager* fm;
+	const Font* font;
 	//Road info
 	std::vector<float> zMap;
 	std::vector<float> factorMap;
@@ -131,6 +147,8 @@ public:
 	ofstream msLog;
 	//car player info
 	unsigned int currentLane = 0;
+	//game info
+	GameState gameState = GameState::PLAYING;
 };
 
 #endif // __MODULESCENESTAGE_H__

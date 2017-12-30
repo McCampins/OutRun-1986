@@ -5,15 +5,17 @@
 #include <algorithm>
 
 #include "Globals.h"
+#include "FontManager.h"
+#include "Font.h"
 #include "Application.h"
 #include "ModuleTextures.h"
 #include "ModuleAudio.h"
 #include "ModuleRender.h"
 #include "ModulePlayer.h"
-#include "ModuleCollision.h"
-#include "ModuleParticles.h"
+#include "ModuleInput.h"
 #include "ModuleSceneMusic.h"
 #include "ModuleSceneStage.h"
+#include "ModuleFadeToBlack.h"
 
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
@@ -25,6 +27,9 @@ using namespace rapidjson;
 ModuleSceneStage::ModuleSceneStage(bool active) : Module(active)
 {
 	back = { 0, 0, 1200, 266 };
+	timeR = { 0, 0, 67, 35 };
+	scoreR = { 0, 0, 76, 36 };
+	lapR = { 0, 0, 59, 28 };
 }
 
 ModuleSceneStage::~ModuleSceneStage()
@@ -42,12 +47,18 @@ bool ModuleSceneStage::Start()
 	LOG("Loading stage scene");
 
 	background = App->textures->Load("rtype/background.png");
+	time = App->textures->Load("rtype/time.png");
+	score = App->textures->Load("rtype/score.png");
+	lap = App->textures->Load("rtype/lap.png");
+	
+	fm = new FontManager();
+
+	fm->Init();
+	font = fm->Allocate("greenfont.bmp", __FILE__, to_string(__LINE__));
 
 	App->player->Enable();
-	App->particles->Enable();
-	App->collision->Enable();
 
-	App->renderer->camera.x = 710;
+	App->renderer->camera.x = STARTINGCAMERA;
 
 	int y = SCREEN_HEIGHT * SCREEN_SIZE;
 	int minY = SCREEN_HEIGHT * SCREEN_SIZE - ROADHEIGHTSCREEN;
@@ -350,20 +361,32 @@ bool ModuleSceneStage::CleanUp()
 
 	textures.clear();
 
-	for (unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it)
+	for (unordered_multimap<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it)
 		delete it->second;
 
 	staticVisualElements.clear();
 
-	for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it)
-		delete *it;
-
-	vehicles.clear();
-
 	App->textures->Unload(background);
+	App->textures->Unload(time);
+	App->textures->Unload(score);
+	App->textures->Unload(lap);
+
 	App->player->Disable();
-	App->collision->Disable();
-	App->particles->Disable();
+
+	currentSegment = 0;
+	currentLane = 0; 
+	previousYTopRoad = 0;
+	gameState = GameState::PLAYING;
+	leftTireOut = false;
+	rigthTireOut = false;
+
+	zMap.clear();
+	factorMap.clear();
+
+	fm->Release("greenfont.bmp");
+	fm->End();
+	fm = nullptr;
+	font = nullptr;
 
 	msLog.close();
 	return true;
@@ -382,6 +405,11 @@ update_status ModuleSceneStage::Update()
 	int adj = int(diff * 0.335f);
 	App->renderer->Blit(background, -600, -11 + adj, &back, 0.1f, 0.7f);
 	App->renderer->Blit(background, 200, -11 + adj, &back, 0.1f, 0.7f);
+
+	//UI
+	App->renderer->Blit(time, 10, 5, &timeR, 0.0f, 0.75f);
+	App->renderer->Blit(score, 110, 5, &scoreR, 0.0f, 0.75f);
+	App->renderer->Blit(lap, 240, 8, &lapR, 0.0f, 0.75f);
 
 	//Road
 	float x = SCREEN_WIDTH * SCREEN_SIZE / 2;
@@ -575,6 +603,13 @@ update_status ModuleSceneStage::Update()
 			currentSegment++;
 		}
 		else {
+			gameState = GameState::ENDING;
+			
+			for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it)
+				delete *it;
+
+			vehicles.clear();
+
 			topSegment = new Segment( 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER );
 		}
 	}
@@ -616,11 +651,17 @@ update_status ModuleSceneStage::Update()
 
 	//Delete all visual elements that have been surpassed by the player
 	if (staticVisualElements.size() > 0) {
-		int startingWorld = staticVisualElements.begin()->first; //starting world position
 		int minWorld = int(((zMap.at(0) * 10) + App->player->position) * 10); //minimum world position seen on screen
 
-		for (int i = startingWorld; i < minWorld; i++) {
-			staticVisualElements.erase(i);
+		unordered_multimap<int, VisualElement*>::iterator it = staticVisualElements.begin();
+		while (it != staticVisualElements.end()) {
+			if (it->first < minWorld) {
+				delete it->second;
+				it = staticVisualElements.erase(it);
+			}
+			else {
+				++it;
+			}
 		}
 	}
 
@@ -639,6 +680,12 @@ update_status ModuleSceneStage::Update()
 	double msVisual = clockToMilliseconds(endVisual - endRoad);
 	double msAdjustments = clockToMilliseconds(endFrame - endVisual);
 	msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
+
+	if (gameState == GameState::ENDING) {
+		if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && App->fade->isFading() == false)		{
+			App->fade->FadeToBlack((Module*)App->scene_intro, this);
+		}
+	}
 
 	return UPDATE_CONTINUE;
 }

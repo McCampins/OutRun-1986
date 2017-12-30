@@ -55,7 +55,7 @@ update_status ModuleSceneIntro::Update()
 	App->renderer->Blit(background, 0, 0, &back, 1.0f, 0.53f);
 	App->renderer->Blit(background, (SCREEN_WIDTH / 2) - 71, 179, &(insertCoin.GetCurrentFrame()), 1.0f, 0.31f);
 	App->renderer->Blit(background, (SCREEN_WIDTH / 2) - 87, 30, &(logo.GetCurrentFrame()));
-
+	
 	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && App->fade->isFading() == false)
 	{
 		App->fade->FadeToBlack((Module*)App->scene_music, this);

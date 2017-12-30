@@ -70,6 +70,12 @@
     <ClInclude Include="ModuleSceneMusic.h">
       <Filter>Game Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Core Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="FontManager.h">
+      <Filter>Core Modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -116,6 +122,12 @@
     </ClCompile>
     <ClCompile Include="ModuleSceneMusic.cpp">
       <Filter>Game Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Core Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="FontManager.cpp">
+      <Filter>Core Modules</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

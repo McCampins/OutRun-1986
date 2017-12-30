@@ -149,6 +149,15 @@ bool ModulePlayer::CleanUp()
 	App->textures->Unload(car);
 	App->textures->Unload(dustTex);
 
+	currentCar = nullptr;
+
+	playersDx = 0;
+	position = 0.0f;
+	playerSpeed = 0.0f;
+	curveSpeed = 0.0f;
+	currentLane = 0;
+	carX = 0;
+
 	return true;
 }
 
@@ -181,309 +190,334 @@ update_status ModulePlayer::Update()
 	unsigned int keysPressed = 0;
 	float normalizedSpeed = 0.0f;
 
-	//Get the segment to know its inclination
-	Segment* s;
-	if (App->scene_stage->topSegment != nullptr) {
-		if (App->scene_stage->topSegment->yMapPosition < 55) {
-			s = App->scene_stage->topSegment;
-		}
-		else {
-			s = App->scene_stage->bottomSegment;
-		}
+	switch (App->scene_stage->gameState) {
+	case GameState::PLAYING:
+		//Get the segment to know its inclination
+		Segment* s;
+		if (App->scene_stage->topSegment != nullptr) {
+			if (App->scene_stage->topSegment->yMapPosition < 55) {
+				s = App->scene_stage->topSegment;
+			}
+			else {
+				s = App->scene_stage->bottomSegment;
+			}
 
-		//Update camera according to left/right
-		if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
-		{
-			keysPressed += 1;
-			if (playerSpeed > 0.0f) {
-				normalizedSpeed = playerSpeed / MAX_SPEED;
-				if (normalizedSpeed < 0.5f) {
-					if (normalizedSpeed > 0.05f) {
-						if (normalizedSpeed < 0.1f) {
+			//Update camera according to left/right
+			if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+			{
+				keysPressed += 1;
+				if (playerSpeed > 0.0f) {
+					normalizedSpeed = playerSpeed / MAX_SPEED;
+					if (normalizedSpeed < 0.5f) {
+						if (normalizedSpeed > 0.05f) {
+							if (normalizedSpeed < 0.1f) {
+								App->renderer->camera.x += 12;
+							}
+							else {
+								App->renderer->camera.x += 18;
+							}
+						}
+					}
+					else {
+						if (normalizedSpeed > 0.75f) {
 							App->renderer->camera.x += 12;
 						}
 						else {
-							App->renderer->camera.x += 18;
+							App->renderer->camera.x += 6;
 						}
 					}
+
 				}
-				else {
-					if (normalizedSpeed > 0.75f) {
-						App->renderer->camera.x += 12;
+			}
+			if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+			{
+				keysPressed += 2;
+				if (playerSpeed > 0.0f) {
+					normalizedSpeed = playerSpeed / MAX_SPEED;
+					if (normalizedSpeed < 0.5f) {
+						if (normalizedSpeed > 0.05f) {
+							if (normalizedSpeed < 0.1f) {
+								App->renderer->camera.x -= 12;
+							}
+							else {
+								App->renderer->camera.x -= 18;
+							}
+						}
 					}
 					else {
-						App->renderer->camera.x += 6;
-					}
-				}
-
-			}
-		}
-		if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
-		{
-			keysPressed += 2;
-			if (playerSpeed > 0.0f) {
-				normalizedSpeed = playerSpeed / MAX_SPEED;
-				if (normalizedSpeed < 0.5f) {
-					if (normalizedSpeed > 0.05f) {
-						if (normalizedSpeed < 0.1f) {
+						if (normalizedSpeed > 0.75f) {
 							App->renderer->camera.x -= 12;
 						}
 						else {
-							App->renderer->camera.x -= 18;
+							App->renderer->camera.x -= 6;
 						}
 					}
 				}
-				else {
-					if (normalizedSpeed > 0.75f) {
-						App->renderer->camera.x -= 12;
+			}
+
+			//Update player's speed and car position according to forward/backward
+			if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+			{
+				keysPressed += 4;
+				switch (s->inc) {
+				case Inclination::UP:
+					if (keyPressed(0, keysPressed)) {
+						currentCar = &breakUpLeft;
+						playersDx = 4;
+					}
+					else if (keyPressed(1, keysPressed)) {
+						currentCar = &breakUpRight;
+						playersDx = -4;
 					}
 					else {
-						App->renderer->camera.x -= 6;
+						currentCar = &breakUp;
+						playersDx = 0;
+					}
+					break;
+				case Inclination::CENTER:
+				case Inclination::DOWN:
+					if (keyPressed(0, keysPressed)) {
+						currentCar = &breakLeft;
+						playersDx = 4;
+					}
+					else if (keyPressed(1, keysPressed)) {
+						currentCar = &breakRight;
+						playersDx = -4;
+					}
+					else {
+						currentCar = &breakCenter;
+						playersDx = 0;
+					}
+					break;
+				}
+				if (playerSpeed > 0.0f) {
+					playerSpeed -= ACCELERATION;
+					if (playerSpeed < 0.0f) {
+						playerSpeed = 0.0f;
 					}
 				}
 			}
-		}
 
-		//Update player's speed and car position according to forward/backward
-		if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
-		{
-			keysPressed += 4;
-			switch (s->inc) {
-			case Inclination::UP:
-				if (keyPressed(0, keysPressed)) {
-					currentCar = &breakUpLeft;
-					playersDx = 4;
+			if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
+			{
+				keysPressed += 8;
+				switch (s->inc) {
+				case Inclination::UP:
+					if (keyPressed(0, keysPressed)) {
+						currentCar = &leftUp;
+						playersDx = 4;
+					}
+					else if (keyPressed(1, keysPressed)) {
+						currentCar = &rightUp;
+						playersDx = -4;
+					}
+					else {
+						currentCar = &forwardUp;
+						playersDx = 0;
+					}
+					break;
+				case Inclination::CENTER:
+				case Inclination::DOWN:
+					if (keyPressed(0, keysPressed)) {
+						currentCar = &left;
+						playersDx = 4;
+					}
+					else if (keyPressed(1, keysPressed)) {
+						currentCar = &right;
+						playersDx = -4;
+					}
+					else {
+						currentCar = &forward;
+						playersDx = 0;
+					}
+					break;
 				}
-				else if (keyPressed(1, keysPressed)) {
-					currentCar = &breakUpRight;
-					playersDx = -4;
+				if (playerSpeed < MAX_SPEED) {
+					playerSpeed += ACCELERATION;
+					if (playerSpeed > MAX_SPEED)
+						playerSpeed = MAX_SPEED;
 				}
-				else {
-					currentCar = &breakUp;
-					playersDx = 0;
-				}
-				break;
-			case Inclination::CENTER:
-			case Inclination::DOWN:
-				if (keyPressed(0, keysPressed)) {
-					currentCar = &breakLeft;
-					playersDx = 4;
-				}
-				else if (keyPressed(1, keysPressed)) {
-					currentCar = &breakRight;
-					playersDx = -4;
-				}
-				else {
-					currentCar = &breakCenter;
-					playersDx = 0;
-				}
-				break;
 			}
-			if (playerSpeed > 0.0f) {
-				playerSpeed -= ACCELERATION;
+
+			//If no key is pressed, decrement speed
+			if (keyPressed(2, keysPressed) == false && keyPressed(3, keysPressed) == false) {
+				playerSpeed -= ACCELERATION / 2;
+				switch (s->inc) {
+				case Inclination::UP:
+					if (keyPressed(0, keysPressed)) {
+						currentCar = &leftUp;
+						playersDx = 4;
+					}
+					else if (keyPressed(1, keysPressed)) {
+						currentCar = &rightUp;
+						playersDx = -4;
+					}
+					else {
+						currentCar = &forwardUp;
+						playersDx = 0;
+					}
+					break;
+				case Inclination::CENTER:
+				case Inclination::DOWN:
+					if (keyPressed(0, keysPressed)) {
+						currentCar = &left;
+						playersDx = 4;
+					}
+					else if (keyPressed(1, keysPressed)) {
+						currentCar = &right;
+						playersDx = -4;
+					}
+					else {
+						currentCar = &forward;
+						playersDx = 0;
+					}
+					break;
+				}
 				if (playerSpeed < 0.0f) {
 					playerSpeed = 0.0f;
 				}
 			}
-		}
 
-		if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
-		{
-			keysPressed += 8;
-			switch (s->inc) {
-			case Inclination::UP:
+			//Adjust animation of car if the car has no speed
+			if (playerSpeed == 0.0f) {
 				if (keyPressed(0, keysPressed)) {
-					currentCar = &leftUp;
 					playersDx = 4;
-				}
-				else if (keyPressed(1, keysPressed)) {
-					currentCar = &rightUp;
-					playersDx = -4;
-				}
-				else {
-					currentCar = &forwardUp;
-					playersDx = 0;
-				}
-				break;
-			case Inclination::CENTER:
-			case Inclination::DOWN:
-				if (keyPressed(0, keysPressed)) {
-					currentCar = &left;
-					playersDx = 4;
-				}
-				else if (keyPressed(1, keysPressed)) {
-					currentCar = &right;
-					playersDx = -4;
-				}
-				else {
-					currentCar = &forward;
-					playersDx = 0;
-				}
-				break;
-			}
-			if (playerSpeed < MAX_SPEED) {
-				playerSpeed += ACCELERATION;
-				if (playerSpeed > MAX_SPEED)
-					playerSpeed = MAX_SPEED;
-			}
-		}
 
-		//If no key is pressed, decrement speed
-		if (keyPressed(2, keysPressed) == false && keyPressed(3, keysPressed) == false) {
-			playerSpeed -= ACCELERATION / 2;
-			switch (s->inc) {
-			case Inclination::UP:
-				if (keyPressed(0, keysPressed)) {
-					currentCar = &leftUp;
-					playersDx = 4;
-				}
-				else if (keyPressed(1, keysPressed)) {
-					currentCar = &rightUp;
-					playersDx = -4;
-				}
-				else {
-					currentCar = &forwardUp;
-					playersDx = 0;
-				}
-				break;
-			case Inclination::CENTER:
-			case Inclination::DOWN:
-				if (keyPressed(0, keysPressed)) {
-					currentCar = &left;
-					playersDx = 4;
-				}
-				else if (keyPressed(1, keysPressed)) {
-					currentCar = &right;
-					playersDx = -4;
-				}
-				else {
-					currentCar = &forward;
-					playersDx = 0;
-				}
-				break;
-			}
-			if (playerSpeed < 0.0f) {
-				playerSpeed = 0.0f;
-			}
-		}
-
-		//Adjust animation of car if the car has no speed
-		if (playerSpeed == 0.0f) {
-			if (keyPressed(0, keysPressed)) {
-				playersDx = 4;
-
-				switch (s->inc) {
-				case Inclination::UP:
-					currentCar = &idleUpLeft;
-					break;
-				case Inclination::CENTER:
-				case Inclination::DOWN:
-					currentCar = &idleLeft;
-					break;
-				}
-			}
-			else if (keyPressed(1, keysPressed)) {
-				playersDx = -4;
-
-				switch (s->inc) {
-				case Inclination::UP:
-					currentCar = &idleUpRight;
-					break;
-				case Inclination::CENTER:
-				case Inclination::DOWN:
-					currentCar = &idleRight;
-					break;
-				}
-			}
-			else {
-				playersDx = 0;
-
-				switch (s->inc) {
-				case Inclination::UP:
-					currentCar = &idleUp;
-					break;
-				case Inclination::CENTER:
-				case Inclination::DOWN:
-					currentCar = &idle;
-					break;
-				}
-			}
-		}
-
-		//Check if colision
-		unsigned int size = App->scene_stage->vehicles.size();
-		float carPosition = 6.0f + position;
-		if (size > 0) {
-			unsigned int idx = 0;
-			VisualElement* vElem = App->scene_stage->vehicles.at(idx);
-			while (int(vElem->world * 10) <= int(carPosition * 10)) {
-				if (int(vElem->world * 10) == int(carPosition * 10)) {
-					unsigned int vehicleLane = 0;
-					switch (vElem->x) {
-					case -1300:
-						vehicleLane = 1;
+					switch (s->inc) {
+					case Inclination::UP:
+						currentCar = &idleUpLeft;
 						break;
-					case -825:
-						vehicleLane = 2;
-						break;
-					case -350:
-						vehicleLane = 3;
-						break;
-					case 125:
-						vehicleLane = 4;
-						break;
-					case 600:
-						vehicleLane = 5;
-						break;
-					case 1075:
-						vehicleLane = 6;
-					}
-					if (vehicleLane == App->scene_stage->currentLane) {
-						playerSpeed = 0;
+					case Inclination::CENTER:
+					case Inclination::DOWN:
+						currentCar = &idleLeft;
 						break;
 					}
 				}
-				idx++;
-				if (idx < size) {
-					vElem = App->scene_stage->vehicles.at(idx);
+				else if (keyPressed(1, keysPressed)) {
+					playersDx = -4;
+
+					switch (s->inc) {
+					case Inclination::UP:
+						currentCar = &idleUpRight;
+						break;
+					case Inclination::CENTER:
+					case Inclination::DOWN:
+						currentCar = &idleRight;
+						break;
+					}
 				}
 				else {
-					break;
+					playersDx = 0;
+
+					switch (s->inc) {
+					case Inclination::UP:
+						currentCar = &idleUp;
+						break;
+					case Inclination::CENTER:
+					case Inclination::DOWN:
+						currentCar = &idle;
+						break;
+					}
+				}
+			}
+
+			//Check if colision
+			unsigned int size = App->scene_stage->vehicles.size();
+			float carPosition = 6.0f + position;
+			if (size > 0) {
+				unsigned int idx = 0;
+				VisualElement* vElem = App->scene_stage->vehicles.at(idx);
+				while (int(vElem->world * 10) <= int(carPosition * 10)) {
+					if (int(vElem->world * 10) == int(carPosition * 10)) {
+						unsigned int vehicleLane = 0;
+						switch (vElem->x) {
+						case -1300:
+							vehicleLane = 1;
+							break;
+						case -825:
+							vehicleLane = 2;
+							break;
+						case -350:
+							vehicleLane = 3;
+							break;
+						case 125:
+							vehicleLane = 4;
+							break;
+						case 600:
+							vehicleLane = 5;
+							break;
+						case 1075:
+							vehicleLane = 6;
+						}
+						if (vehicleLane == App->scene_stage->currentLane) {
+							playerSpeed = 0;
+							break;
+						}
+					}
+					idx++;
+					if (idx < size) {
+						vElem = App->scene_stage->vehicles.at(idx);
+					}
+					else {
+						break;
+					}
 				}
 			}
 		}
 
 		position += playerSpeed;
 		curveSpeed = playerSpeed * 10;
+		break;
+	case GameState::ENDING:
+		if (playerSpeed > 0.0f) 
+			playerSpeed -= ACCELERATION;
 
-		carX = ((SCREEN_WIDTH - 92) / 2) - (App->renderer->camera.x / SCREEN_SIZE);
-		//Draw car and player
-		App->renderer->Blit(car, carX, SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
-		if (playerSpeed > 0.0f) {
-			App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayerMoving.GetCurrentFrame()));
-			App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayerMoving.GetCurrentFrame()));
-		}
-		else {
-			App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayer.GetCurrentFrame()));
-			App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayer.GetCurrentFrame()));
-		}
+		if (playerSpeed < 0.0f)
+			playerSpeed = 0.0f;
 
-		//Draw out of road particles
-		bool out = false;
-		if (App->scene_stage->leftTireOut) {
-			App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE) - 75, SCREEN_HEIGHT - 35, &(leftDust.GetCurrentFrame()));
-			out = true;
+		position += playerSpeed;
+		curveSpeed = playerSpeed * 10;	
+
+		if (App->renderer->camera.x > 0) {
+			App->renderer->camera.x -= 12; 
+			if (App->renderer->camera.x < 0)
+				App->renderer->camera.x = 0;
 		}
-		if (App->scene_stage->rigthTireOut) {
-			App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 35, &(rightDust.GetCurrentFrame()));
-			out = true;
+		if (App->renderer->camera.x < 0) {
+			App->renderer->camera.x += 12;
+			if (App->renderer->camera.x > 0)
+				App->renderer->camera.x = 0;
 		}
-		if (out) {
-			if (playerSpeed > 0.05f) {
-				playerSpeed -= ACCELERATION * 2;
-				if (playerSpeed < 0.0f) {
-					playerSpeed = 0.0f;
-				}
+		break;
+	}
+
+	carX = ((SCREEN_WIDTH - 92) / 2) - (App->renderer->camera.x / SCREEN_SIZE);
+	//Draw car and player
+	App->renderer->Blit(car, carX, SCREEN_HEIGHT - 48, &(currentCar->GetCurrentFrame()));
+	if (playerSpeed > 0.0f) {
+		App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayerMoving.GetCurrentFrame()));
+		App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayerMoving.GetCurrentFrame()));
+	}
+	else {
+		App->renderer->Blit(car, ((SCREEN_WIDTH - 50 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 50, &(malePlayer.GetCurrentFrame()));
+		App->renderer->Blit(car, ((SCREEN_WIDTH + 6 + playersDx) / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 48, &(femalePlayer.GetCurrentFrame()));
+	}
+
+	//Draw out of road particles
+	bool out = false;
+	if (App->scene_stage->leftTireOut) {
+		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE) - 75, SCREEN_HEIGHT - 35, &(leftDust.GetCurrentFrame()));
+		out = true;
+	}
+	if (App->scene_stage->rigthTireOut) {
+		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 35, &(rightDust.GetCurrentFrame()));
+		out = true;
+	}
+	if (out) {
+		if (playerSpeed > 0.05f) {
+			playerSpeed -= ACCELERATION * 2;
+			if (playerSpeed < 0.0f) {
+				playerSpeed = 0.0f;
 			}
 		}
 	}
