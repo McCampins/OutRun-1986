@@ -409,17 +409,7 @@ bool compareVisualElements(VisualElement* i, VisualElement* j) { return (i->worl
 update_status ModuleSceneStage::Update()
 {
 	secondsPassed = (clock() - startTimer) / CLOCKS_PER_SEC;
-
-	if (gameState == GameState::STARTING) {
-		if (secondsPassed >= timeToStart)
-		{
-			startTimer = clock();
-			gameState = GameState::PLAYING;
-		}
-
-		App->renderer->Print(greenFont, 200, 20, to_string(timeToFinish));
-	}
-
+	
 	clock_t beginFrame = clock();
 	int typeOfRoad = 0;
 
@@ -614,6 +604,16 @@ update_status ModuleSceneStage::Update()
 	}
 
 	clock_t endVisual = clock();
+	
+	if (gameState == GameState::STARTING) {
+		if (secondsPassed >= timeToStart)
+		{
+			startTimer = clock();
+			gameState = GameState::PLAYING;
+		}
+
+		App->renderer->Print(greenFont, 220, 20, to_string(timeToFinish));
+	}
 
 	if (gameState == GameState::PLAYING  || gameState == GameState::GAMEOVER) {
 		//Update segments
@@ -710,7 +710,7 @@ update_status ModuleSceneStage::Update()
 			gameState = GameState::GAMEOVER;
 		}
 
-		App->renderer->Print(greenFont, 200, 20, to_string(int(timeLeft)));
+		App->renderer->Print(greenFont, 220, 20, to_string(int(timeLeft)));
 	}
 
 	if (gameState == GameState::ENDING || gameState == GameState::GAMEOVER) {
