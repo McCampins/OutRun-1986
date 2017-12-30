@@ -191,6 +191,9 @@ update_status ModulePlayer::Update()
 	float normalizedSpeed = 0.0f;
 
 	switch (App->scene_stage->gameState) {
+	case GameState::STARTING:
+		currentCar = &idle;
+		break;
 	case GameState::PLAYING:
 		//Get the segment to know its inclination
 		Segment* s;

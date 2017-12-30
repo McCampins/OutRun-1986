@@ -148,7 +148,14 @@ public:
 	//car player info
 	unsigned int currentLane = 0;
 	//game info
-	GameState gameState = GameState::PLAYING;
+	GameState gameState = GameState::STARTING;
+	int timeLeft = 65;
+	bool firstDraw = true;
+	double secondsPassed = 0;
+	double timeToStart = 4;
+	clock_t startTimer;
+	const char* startRace = nullptr;
+	unsigned int semaphoreFx = 0;
 };
 
 #endif // __MODULESCENESTAGE_H__

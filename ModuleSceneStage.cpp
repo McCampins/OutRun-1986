@@ -50,7 +50,9 @@ bool ModuleSceneStage::Start()
 	time = App->textures->Load("rtype/time.png");
 	score = App->textures->Load("rtype/score.png");
 	lap = App->textures->Load("rtype/lap.png");
-	
+
+	startRace = "rtype/Music/startingRace.wav";
+
 	fm = new FontManager();
 
 	fm->Init();
@@ -338,6 +340,11 @@ bool ModuleSceneStage::Start()
 	topSegment = stageSegments.at(currentSegment);
 	currentSegment++;
 
+	semaphoreFx = App->audio->LoadFx(startRace);
+
+	startTimer = clock(); //Start timer
+	App->audio->PlayFx(semaphoreFx);
+
 	msLog.open("log.txt");
 
 	return true;
@@ -347,7 +354,7 @@ bool ModuleSceneStage::Start()
 bool ModuleSceneStage::CleanUp()
 {
 	LOG("Unloading stage scene");
-	
+
 	for (std::vector<Segment*>::iterator it = stageSegments.begin(); it != stageSegments.end(); ++it)
 		delete *it;
 
@@ -374,11 +381,16 @@ bool ModuleSceneStage::CleanUp()
 	App->player->Disable();
 
 	currentSegment = 0;
-	currentLane = 0; 
+	currentLane = 0;
 	previousYTopRoad = 0;
 	gameState = GameState::PLAYING;
 	leftTireOut = false;
 	rigthTireOut = false;
+	firstDraw = true;
+	timeLeft = 65;
+	secondsPassed = 0;
+	timeToStart = 4;
+	startRace = nullptr;
 
 	zMap.clear();
 	factorMap.clear();
@@ -397,6 +409,14 @@ bool compareVisualElements(VisualElement* i, VisualElement* j) { return (i->worl
 // Update: draw background
 update_status ModuleSceneStage::Update()
 {
+	if (gameState == GameState::STARTING) {
+		secondsPassed = (clock() - startTimer) / CLOCKS_PER_SEC;
+		if (secondsPassed >= timeToStart)
+		{
+			gameState = GameState::PLAYING;
+		}
+	}
+
 	clock_t beginFrame = clock();
 	int typeOfRoad = 0;
 
@@ -524,7 +544,7 @@ update_status ModuleSceneStage::Update()
 			currentLane = CheckLane(x, scaleFactor, roadSeparation);
 		}
 		screenYPerWorldPosition.push_back(screenY);
-		
+
 		clock_t endCheck = clock();
 
 		msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
@@ -540,7 +560,7 @@ update_status ModuleSceneStage::Update()
 	float width;
 	VisualElement* vElem;
 	std::vector<VisualElement*> elementsDrawn;
-	
+
 	for (int i = zMap.size() - 1; i >= 0; i--) {
 		z = zMap.at(i);
 		scaleFactor = factorMap.at(i);
@@ -581,7 +601,7 @@ update_status ModuleSceneStage::Update()
 				}
 				idx++;
 				if (idx < vehicles.size()) {
-					vElem = vehicles.at(idx);				
+					vElem = vehicles.at(idx);
 				}
 				else {
 					break;
@@ -593,96 +613,98 @@ update_status ModuleSceneStage::Update()
 
 	clock_t endVisual = clock();
 
-	//Update segments
-	App->renderer->camera.x += curveCameraMove;
-	topSegment->yMapPosition -= App->player->curveSpeed;
-	if (topSegment->yMapPosition < 0) {
-		bottomSegment = topSegment;
-		if (currentSegment < stageSegments.size()) {
-			topSegment = stageSegments.at(currentSegment);
-			currentSegment++;
-		}
-		else {
-			gameState = GameState::ENDING;
-			
-			for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it)
-				delete *it;
-
-			vehicles.clear();
-
-			topSegment = new Segment( 0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER );
-		}
-	}
-
-	//Update the camera according to the curve and the speed of the player
-	curveCameraMove = 0;
-	if (App->player->playerSpeed != 0.0f) {
-		if (bottomSegment->dX > 0.0f) {
-			float normalize = App->player->playerSpeed / MAX_SPEED;
-			if (normalize < 0.2f) {
-				curveCameraMove = 0;
-			}
-			else if (normalize < 0.33f) {
-				curveCameraMove = 3;
-			}
-			else if (normalize < 0.66f) {
-				curveCameraMove = 6;
+	if (gameState == GameState::PLAYING) {
+		//Update segments
+		App->renderer->camera.x += curveCameraMove;
+		topSegment->yMapPosition -= App->player->curveSpeed;
+		if (topSegment->yMapPosition < 0) {
+			bottomSegment = topSegment;
+			if (currentSegment < stageSegments.size()) {
+				topSegment = stageSegments.at(currentSegment);
+				currentSegment++;
 			}
 			else {
-				curveCameraMove = 9;
+				gameState = GameState::ENDING;
+
+				for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it)
+					delete *it;
+
+				vehicles.clear();
+
+				topSegment = new Segment(0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER);
 			}
 		}
-		else if (bottomSegment->dX < 0.0f) {
-			float normalize = App->player->playerSpeed / MAX_SPEED;
-			if (normalize < 0.2f) {
-				curveCameraMove = 0;
+
+		//Update the camera according to the curve and the speed of the player
+		curveCameraMove = 0;
+		if (App->player->playerSpeed != 0.0f) {
+			if (bottomSegment->dX > 0.0f) {
+				float normalize = App->player->playerSpeed / MAX_SPEED;
+				if (normalize < 0.2f) {
+					curveCameraMove = 0;
+				}
+				else if (normalize < 0.33f) {
+					curveCameraMove = 3;
+				}
+				else if (normalize < 0.66f) {
+					curveCameraMove = 6;
+				}
+				else {
+					curveCameraMove = 9;
+				}
 			}
-			else if (normalize < 0.33f) {
-				curveCameraMove = -3;
-			}
-			else if (normalize < 0.66f) {
-				curveCameraMove = -6;
-			}
-			else {
-				curveCameraMove = -9;
+			else if (bottomSegment->dX < 0.0f) {
+				float normalize = App->player->playerSpeed / MAX_SPEED;
+				if (normalize < 0.2f) {
+					curveCameraMove = 0;
+				}
+				else if (normalize < 0.33f) {
+					curveCameraMove = -3;
+				}
+				else if (normalize < 0.66f) {
+					curveCameraMove = -6;
+				}
+				else {
+					curveCameraMove = -9;
+				}
 			}
 		}
-	}
 
-	//Delete all visual elements that have been surpassed by the player
-	if (staticVisualElements.size() > 0) {
-		int minWorld = int(((zMap.at(0) * 10) + App->player->position) * 10); //minimum world position seen on screen
+		//Delete all visual elements that have been surpassed by the player
+		if (staticVisualElements.size() > 0) {
+			int minWorld = int(((zMap.at(0) * 10) + App->player->position) * 10); //minimum world position seen on screen
 
-		unordered_multimap<int, VisualElement*>::iterator it = staticVisualElements.begin();
-		while (it != staticVisualElements.end()) {
-			if (it->first < minWorld) {
-				delete it->second;
-				it = staticVisualElements.erase(it);
-			}
-			else {
-				++it;
+			unordered_multimap<int, VisualElement*>::iterator it = staticVisualElements.begin();
+			while (it != staticVisualElements.end()) {
+				if (it->first < minWorld) {
+					delete it->second;
+					it = staticVisualElements.erase(it);
+				}
+				else {
+					++it;
+				}
 			}
 		}
+
+		//Update visual elements world position
+		for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it) {
+			VisualElement* aux = *it;
+			aux->world += aux->speed;
+		}
+		std::sort(vehicles.begin(), vehicles.end(), compareVisualElements);
+
+		clock_t endFrame = clock();
+
+		double msTotalPassed = clockToMilliseconds(endFrame - beginFrame);
+		double msDraw = clockToMilliseconds(endDraw - beginFrame);
+		double msRoad = clockToMilliseconds(endRoad - endDraw);
+		double msVisual = clockToMilliseconds(endVisual - endRoad);
+		double msAdjustments = clockToMilliseconds(endFrame - endVisual);
+		msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
 	}
-
-	//Update visual elements world position
-	for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it) {
-		VisualElement* aux = *it;
-		aux->world += aux->speed;
-	}
-	std::sort(vehicles.begin(), vehicles.end(), compareVisualElements);
-
-	clock_t endFrame = clock();
-
-	double msTotalPassed = clockToMilliseconds(endFrame - beginFrame);
-	double msDraw = clockToMilliseconds(endDraw - beginFrame);
-	double msRoad = clockToMilliseconds(endRoad - endDraw);
-	double msVisual = clockToMilliseconds(endVisual - endRoad);
-	double msAdjustments = clockToMilliseconds(endFrame - endVisual);
-	msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
 
 	if (gameState == GameState::ENDING) {
-		if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && App->fade->isFading() == false)		{
+		if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && App->fade->isFading() == false) {
 			App->fade->FadeToBlack((Module*)App->scene_intro, this);
 		}
 	}
