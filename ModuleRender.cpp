@@ -142,14 +142,18 @@ bool ModuleRender::Print(const Font* font, const int x, const int y, const strin
 		rect1.x = int(x + i * fontWidth);
 		rect1.y = y;
 		char c = text.at(i);
-		rect2 = *(font->traductionTable.at(c));
 		if (asciiBegin <= c && c <= asciiEnd) {
-			if (SDL_RenderCopy(renderer, font->fontSurface, &rect2, &rect1) != 0)
-			{
-				LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
-				ret = false;
-			}
+			rect2 = *(font->traductionTable.at(c));
 		}
+		else {
+			rect2 = { 0, int(fontHeight) + 3, int(fontWidth), int(fontHeight) };
+		}
+		if (SDL_RenderCopy(renderer, font->fontSurface, &rect2, &rect1) != 0)
+		{
+			LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
+			ret = false;
+		}
+
 	}
 
 	return ret;

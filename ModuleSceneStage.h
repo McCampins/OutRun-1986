@@ -127,6 +127,8 @@ public:
 	SDL_Rect scoreR;
 	FontManager* fm;
 	const Font* greenFont;
+	const Font* pinkFont;
+	const Font* redFont;
 	//Road info
 	std::vector<float> zMap;
 	std::vector<float> factorMap;
@@ -148,7 +150,8 @@ public:
 	unsigned int currentLane = 0;
 	//game info
 	GameState gameState = GameState::STARTING;
-	int timeToFinish = 65;
+	int timeToFinish = 55;
+	int timeRemaining = 0;
 	bool firstDraw = true;
 	double secondsPassed = 0;
 	double timeToStart = 4;
