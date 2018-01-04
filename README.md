@@ -34,6 +34,12 @@ In the stage scene
 
 ---
 
+## Victory conditions
+
+There is a time limit to reach the goal, if you fail to reach a certain point on the stage before the time runs out you lose.
+
+---
+
 ## Game Tips
 
 Each lane has a different speed, so make sure to know which are fast lanes and which are slow lanes. Driving in fast lanes is easier as the cars will not approach you as fast, so you will have more time to react.
