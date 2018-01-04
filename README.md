@@ -1,5 +1,7 @@
 # OutRun-1986
 
+---
+
 ## Game Info 
 
 Tribute to the 1986 old school arcade game OutRun done in the last three months. The first stage has been replicated with the help of the SDL libraries. The code has been coded in C++ and follows a simple modular structure. 
@@ -8,11 +10,11 @@ Even though only the first stage has been reproduced, the code is prepared to in
 
 Some logic and functions would obviously need to be added, but even though I knew that the full replica would be impossible to achieve, the code has been structured to favor expansion and be able to add new stages and mechanics that existed in the original game without too much changes.
 
-
+---
 
 ## Gameplay video
 
-
+---
 
 ## Player Commands 
 
@@ -30,7 +32,7 @@ In the stage scene
 
 > The Space key advances between the first screens and once you lose or win, to go back to the initial screen without exiting the game.
 
-
+---
 
 ## Game Tips
 
@@ -40,7 +42,7 @@ Also the cars start always on the same position and have the same speed each gam
 
 Additionally, the game difficulty is relatively high, as with only one stage once you pass it you finish the game. To win, you cannot crash into any car, as the time you lose is almost always too much to finish in time.
 
-
+---
 
 ## Project information
 
