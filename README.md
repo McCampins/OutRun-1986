@@ -8,6 +8,8 @@ Even though only the first stage has been reproduced, the code is prepared to in
 
 Some logic and functions would obviously need to be added, but even though I knew that the full replica would be impossible to achieve, the code has been structured to favor expansion and be able to add new stages and mechanics that existed in the original game without too much changes.
 
+
+
 ## Gameplay video
 
 
@@ -28,6 +30,8 @@ In the stage scene
 
 > The Space key advances between the first screens and once you lose or win, to go back to the initial screen without exiting the game.
 
+
+
 ## Game Tips
 
 Each lane has a different speed, so make sure to know which are fast lanes and which are slow lanes. Driving in fast lanes is easier as the cars will not approach you as fast, so you will have more time to react.
@@ -35,6 +39,8 @@ Each lane has a different speed, so make sure to know which are fast lanes and w
 Also the cars start always on the same position and have the same speed each game , so you can learn their patterns in order to know when to steer.
 
 Additionally, the game difficulty is relatively high, as with only one stage once you pass it you finish the game. To win, you cannot crash into any car, as the time you lose is almost always too much to finish in time.
+
+
 
 ## Project information
 
