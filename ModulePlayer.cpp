@@ -425,14 +425,15 @@ update_status ModulePlayer::Update()
 			}
 
 			//Check if colision
+			bool collision = false;
+			unsigned int vehicleLane = 0;
 			unsigned int size = App->scene_stage->vehicles.size();
 			float carPosition = 6.0f + position;
 			if (size > 0) {
 				unsigned int idx = 0;
 				VisualElement* vElem = App->scene_stage->vehicles.at(idx);
-				while (int(vElem->world * 10) <= int(carPosition * 10)) {
+				while (idx < App->scene_stage->vehicles.size()) {
 					if (int(vElem->world * 10) == int(carPosition * 10)) {
-						unsigned int vehicleLane = 0;
 						switch (vElem->x) {
 						case -1300:
 							vehicleLane = 1;
@@ -454,11 +455,53 @@ update_status ModulePlayer::Update()
 						}
 						if (vehicleLane == App->scene_stage->currentLane) {
 							playerSpeed = 0;
+							collision = true;
 							break;
 						}
 					}
 					idx++;
 					if (idx < size) {
+						vElem = App->scene_stage->vehicles.at(idx);
+					}
+					else {
+						break;
+					}
+				}
+			}
+
+			if (collision == true) {
+				unsigned int idx = 0;
+				VisualElement* vElem = App->scene_stage->vehicles.at(idx);
+				while (idx < App->scene_stage->vehicles.size()) {
+					if (int(vElem->world * 10) < int(carPosition * 10)) {
+						unsigned int lane = 0;
+						switch (vElem->x) {
+						case -1300:
+							lane = 1;
+							break;
+						case -825:
+							lane = 2;
+							break;
+						case -350:
+							lane = 3;
+							break;
+						case 125:
+							lane = 4;
+							break;
+						case 600:
+							lane = 5;
+							break;
+						case 1075:
+							lane = 6;
+						}
+						if (vehicleLane == lane) {
+							delete App->scene_stage->vehicles.at(idx);
+							App->scene_stage->vehicles.erase(App->scene_stage->vehicles.begin() + idx);
+							idx--;
+						}
+					}
+					idx++;
+					if (idx < App->scene_stage->vehicles.size()) {
 						vElem = App->scene_stage->vehicles.at(idx);
 					}
 					else {

@@ -582,7 +582,7 @@ update_status ModuleSceneStage::Update()
 		if (vehicles.size() > 0) {
 			unsigned int idx = 0;
 			vElem = vehicles.at(idx);
-			while (int(vElem->world * 10) <= int(worldPosition * 10)) {
+			while (idx < vehicles.size()) {
 				if (int(vElem->world * 10) == int(worldPosition * 10)) {
 					bool drawn = false;
 					for (std::vector<VisualElement*>::iterator elemIt = elementsDrawn.begin(); elemIt != elementsDrawn.end(); ++elemIt) {
