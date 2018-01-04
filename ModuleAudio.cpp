@@ -114,9 +114,12 @@ bool ModuleAudio::PlayMusic(const char* path, float fade_time)
 			}
 		}
 	}
-
 	LOG("Successfully playing %s", path);
 	return ret;
+}
+
+void ModuleAudio::StopMusic() {
+	Mix_HaltMusic();
 }
 
 // Load WAV

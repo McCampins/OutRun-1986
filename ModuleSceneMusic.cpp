@@ -54,7 +54,7 @@ update_status ModuleSceneMusic::Update()
 	switch (currentScreen) {
 	case 0:
 		App->renderer->Blit(background, 0, 0, &breeze, 1.0f, 0.59f);
-		if (musicPlaying != currentScreen) {
+		if (musicPlaying != currentScreen && mute == false) {
 			App->audio->PlayMusic(passingBreeze, 0.0f);
 			musicPlaying = 0;
 		}
@@ -62,14 +62,14 @@ update_status ModuleSceneMusic::Update()
 		break;
 	case 1:
 		App->renderer->Blit(background, 0, 0, &magical, 1.0f, 0.59f);
-		if (musicPlaying != currentScreen) {
+		if (musicPlaying != currentScreen && mute == false) {
 			App->audio->PlayMusic(magicalSound, 0.0f);
 			musicPlaying = 1;
 		}
 		break;
 	case 2:
 		App->renderer->Blit(background, 0, 0, &splash, 1.0f, 0.59f);
-		if (musicPlaying != currentScreen) {
+		if (musicPlaying != currentScreen && mute == false) {
 			App->audio->PlayMusic(splashWave, 0.0f);
 			musicPlaying = 2;
 		}
@@ -79,6 +79,26 @@ update_status ModuleSceneMusic::Update()
 	if (App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && App->fade->isFading() == false)
 	{
 		App->fade->FadeToBlack((Module*)App->scene_stage, this);
+	}
+
+	if (App->input->GetKey(SDL_SCANCODE_M) == KEY_DOWN)
+	{
+		App->audio->StopMusic();
+		mute = !mute;
+		//If unmute
+		if (mute == false) {
+			switch (musicPlaying) {
+			case 0:
+				App->audio->PlayMusic(passingBreeze, 0.0f);
+				break;
+			case 1:
+				App->audio->PlayMusic(magicalSound, 0.0f);
+				break;
+			case 2:
+				App->audio->PlayMusic(splashWave, 0.0f);
+				break;
+		}
+		}
 	}
 
 	return UPDATE_CONTINUE;
