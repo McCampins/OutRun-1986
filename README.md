@@ -14,6 +14,8 @@ Some logic and functions would obviously need to be added, but even though I kne
 
 ## Gameplay video
 
+<iframe width="560" height="315" src="https://www.youtube.com/watch?v=LpUpAfL0tMU" frameborder="0" allowfullscreen></iframe> You can watch it directly on [youtube](https://www.youtube.com/watch?v=LpUpAfL0tMU). 
+
 ---
 
 ## Player Commands 
