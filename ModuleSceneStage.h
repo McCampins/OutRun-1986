@@ -122,7 +122,6 @@ public:
 	SDL_Texture* time = nullptr;
 	SDL_Rect back;
 	SDL_Rect timeR;
-	SDL_Rect scoreR;
 	ModuleFontManager* fm = nullptr;
 	const ModuleFont* greenFont = nullptr;
 	const ModuleFont* pinkFont = nullptr;

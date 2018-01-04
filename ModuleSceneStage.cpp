@@ -28,7 +28,6 @@ ModuleSceneStage::ModuleSceneStage(bool active) : Module(active)
 {
 	back = { 0, 0, 1200, 266 };
 	timeR = { 0, 0, 67, 35 };
-	scoreR = { 0, 0, 76, 36 };
 }
 
 ModuleSceneStage::~ModuleSceneStage()
