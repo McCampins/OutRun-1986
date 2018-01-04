@@ -43,9 +43,6 @@
     <ClInclude Include="Animation.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Point.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="ModulePlayer.h">
       <Filter>Game Modules</Filter>
     </ClInclude>
@@ -70,6 +67,7 @@
     <ClInclude Include="ModuleFontManager.h">
       <Filter>Core Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Point.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
