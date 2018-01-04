@@ -1,5 +1,5 @@
-#include "FontManager.h"
-#include "Font.h"
+#include "ModuleFontManager.h"
+#include "ModuleFont.h"
 
 #include <iostream>
 #include <vector>
@@ -9,9 +9,9 @@
 
 using namespace::std;
 
-FontManager::FontManager() {}
+ModuleFontManager::ModuleFontManager() {}
 
-FontManager::~FontManager() {}
+ModuleFontManager::~ModuleFontManager() {}
 
 
 vector<string> getFilenames(experimental::filesystem::path path) {
@@ -40,15 +40,15 @@ string replaceBackslashes(string s)
 	return s;
 }
 
-bool FontManager::Init() {
+bool ModuleFontManager::Init() {
 	bool ret = true;
 
 	string path = "config/fonts/";
 	vector<string> filenames = getFilenames(path);
-	Font* font;
+	ModuleFont* font;
 	for (vector<string>::iterator it = filenames.begin(); it != filenames.end() && ret; ++it)
 	{
-		font = new Font();
+		font = new ModuleFont();
 		string fontName = replaceBackslashes(*it);
 		ret = font->Init(fontName, "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.,@");
 		if (ret)
@@ -61,7 +61,7 @@ bool FontManager::Init() {
 	return ret;
 }
 
-const Font * FontManager::Allocate(const string font, const string file, const string line)
+const ModuleFont * ModuleFontManager::Allocate(const string font, const string file, const string line)
 {
 	bool fontFound = false;
 	int fontIndex = 0;
@@ -81,7 +81,7 @@ const Font * FontManager::Allocate(const string font, const string file, const s
 		}
 	}
 
-	list<Font*>::const_iterator it = fontPointers.begin();
+	list<ModuleFont*>::const_iterator it = fontPointers.begin();
 	for (int i = 0; i < fontIndex; i++)
 	{
 		it = next(it, 1);
@@ -93,7 +93,7 @@ const Font * FontManager::Allocate(const string font, const string file, const s
 	return *it;
 }
 
-const bool FontManager::Release(const string font)
+const bool ModuleFontManager::Release(const string font)
 {
 	bool ret = true;
 	bool found = false;
@@ -126,7 +126,7 @@ const bool FontManager::Release(const string font)
 	return found;
 }
 
-void FontManager::End()
+void ModuleFontManager::End()
 {
 	if (reservedFontName.empty() == false)
 	{
@@ -143,9 +143,10 @@ void FontManager::End()
 	{
 		fontNames.clear();
 
-		for (list<Font*>::iterator it = fontPointers.begin(); it != fontPointers.end(); ++it)
+		for (list<ModuleFont*>::iterator it = fontPointers.begin(); it != fontPointers.end(); ++it)
 		{
 			(*it)->End();
+			delete *it;
 		}
 		fontPointers.clear();
 	}

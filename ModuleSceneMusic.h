@@ -23,7 +23,7 @@ public:
 	const char* splashWave = nullptr;
 	const char* passingBreeze = nullptr;
 	const char* magicalSound = nullptr;
-	unsigned int currentScreen = 1;
+	unsigned int currentScreen;
 };
 
 #endif // __MODULESCENEMUSIC_H__

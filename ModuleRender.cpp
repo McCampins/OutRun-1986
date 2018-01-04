@@ -62,7 +62,9 @@ update_status ModuleRender::PreUpdate()
 update_status ModuleRender::Update()
 {
 	// debug camera
+	//Uncomment when debugging to be able to move the camera
 
+	/*
 	int curveSpeed = 3;
 
 	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
@@ -77,6 +79,7 @@ update_status ModuleRender::Update()
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 		camera.x -= curveSpeed;
 
+	*/
 
 	return UPDATE_CONTINUE;
 }
@@ -131,7 +134,7 @@ bool ModuleRender::Blit(SDL_Texture* texture, int x, int y, SDL_Rect* section, f
 	return ret;
 }
 
-bool ModuleRender::Print(const Font* font, const int x, const int y, const string text)
+bool ModuleRender::Print(const ModuleFont* font, const int x, const int y, const string text)
 {
 	bool ret = true;
 	SDL_Rect rect1, rect2;

@@ -21,7 +21,7 @@
 #include "Module.h"
 
 struct SDL_Texture;
-class FontManager;
+class ModuleFontManager;
 
 enum class Inclination {
 	UP,
@@ -120,22 +120,20 @@ public:
 	//textures
 	SDL_Texture* background = nullptr;
 	SDL_Texture* time = nullptr;
-	SDL_Texture* score = nullptr;
-	SDL_Texture* lap = nullptr;
 	SDL_Rect back;
 	SDL_Rect timeR;
 	SDL_Rect scoreR;
-	FontManager* fm;
-	const Font* greenFont;
-	const Font* pinkFont;
-	const Font* redFont;
+	ModuleFontManager* fm = nullptr;
+	const ModuleFont* greenFont = nullptr;
+	const ModuleFont* pinkFont = nullptr;
+	const ModuleFont* redFont = nullptr;
 	//Road info
 	std::vector<float> zMap;
 	std::vector<float> factorMap;
 	std::vector<Segment*> stageSegments;
 	unsigned int currentSegment = 0;
-	Segment* topSegment;
-	Segment* bottomSegment;
+	Segment* topSegment = nullptr;
+	Segment* bottomSegment = nullptr;
 	int curveCameraMove = 0;
 	bool leftTireOut = false;
 	bool rigthTireOut = false;

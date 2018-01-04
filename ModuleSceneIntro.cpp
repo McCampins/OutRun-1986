@@ -45,6 +45,7 @@ bool ModuleSceneIntro::CleanUp()
 	LOG("Unloading game intro");
 
 	App->textures->Unload(background);
+	background = nullptr;
 
 	return true;
 }

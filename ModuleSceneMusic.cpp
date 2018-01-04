@@ -32,6 +32,8 @@ bool ModuleSceneMusic::Start()
 
 	musicPlaying = -1;
 
+	currentScreen = 1;
+
 	return true;
 }
 
@@ -87,6 +89,11 @@ bool ModuleSceneMusic::CleanUp()
 	LOG("Unloading select music scene");
 
 	App->textures->Unload(background);
+	background = nullptr;
+
+	magicalSound = nullptr;
+	passingBreeze = nullptr;
+	splashWave = nullptr;
 
 	return true;
 }

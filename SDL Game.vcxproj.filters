@@ -55,12 +55,6 @@
     <ClInclude Include="MemLeaks.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleParticles.h">
-      <Filter>Core Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="ModuleCollision.h">
-      <Filter>Core Modules</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleSceneIntro.h">
       <Filter>Game Modules</Filter>
     </ClInclude>
@@ -70,10 +64,10 @@
     <ClInclude Include="ModuleSceneMusic.h">
       <Filter>Game Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Font.h">
+    <ClInclude Include="ModuleFont.h">
       <Filter>Core Modules</Filter>
     </ClInclude>
-    <ClInclude Include="FontManager.h">
+    <ClInclude Include="ModuleFontManager.h">
       <Filter>Core Modules</Filter>
     </ClInclude>
   </ItemGroup>
@@ -108,12 +102,6 @@
     <ClCompile Include="ModuleInput.cpp">
       <Filter>Core Modules</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleParticles.cpp">
-      <Filter>Core Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="ModuleCollision.cpp">
-      <Filter>Core Modules</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleSceneIntro.cpp">
       <Filter>Game Modules</Filter>
     </ClCompile>
@@ -123,10 +111,10 @@
     <ClCompile Include="ModuleSceneMusic.cpp">
       <Filter>Game Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Font.cpp">
+    <ClCompile Include="ModuleFont.cpp">
       <Filter>Core Modules</Filter>
     </ClCompile>
-    <ClCompile Include="FontManager.cpp">
+    <ClCompile Include="ModuleFontManager.cpp">
       <Filter>Core Modules</Filter>
     </ClCompile>
   </ItemGroup>

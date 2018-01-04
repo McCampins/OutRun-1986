@@ -1,5 +1,5 @@
-#ifndef __FONT_H__
-#define __FONT_H__
+#ifndef __MODULEFONT_H__
+#define __MODULEFONT_H__
 
 #define asciiBegin 33
 #define asciiEnd 126
@@ -12,11 +12,11 @@
 
 using namespace std;
 
-class Font
+class ModuleFont
 {
 public:
-	Font();
-	~Font();
+	ModuleFont();
+	~ModuleFont();
 
 	bool Init(const string str, const string trad);
 	void End();

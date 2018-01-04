@@ -2,9 +2,7 @@
 #include "Application.h"
 #include "ModuleTextures.h"
 #include "ModuleInput.h"
-#include "ModuleParticles.h"
 #include "ModuleRender.h"
-#include "ModuleCollision.h"
 #include "ModuleFadeToBlack.h"
 #include "ModulePlayer.h"
 #include "ModuleSceneStage.h"
@@ -106,11 +104,11 @@ ModulePlayer::ModulePlayer(bool active) : Module(active)
 	malePlayer.frames.push_back({ 389, 15, 24, 15 });
 	malePlayerMoving.frames.push_back({ 389, 15, 24, 15 });
 	malePlayerMoving.frames.push_back({ 389, 29, 24, 15 });
-	malePlayerMoving.speed = 0.025f;
+	malePlayerMoving.speed = 0.05f;
 	femalePlayer.frames.push_back({ 419, 16, 15, 12 });
 	femalePlayerMoving.frames.push_back({ 419, 16, 15, 12 });
 	femalePlayerMoving.frames.push_back({ 419, 28, 14, 14 });
-	femalePlayerMoving.speed = 0.025f;
+	femalePlayerMoving.speed = 0.05f;
 
 	//Dust (left tire)
 	leftDust.frames.push_back({ 0, 13, 68, 28 });
@@ -136,7 +134,7 @@ bool ModulePlayer::Start()
 	LOG("Loading player");
 
 	car = App->textures->Load("rtype/ferrari.png");
-	dustTex = App->textures->Load("rtype/dust.png");
+	dust = App->textures->Load("rtype/dust.png");
 
 	return true;
 }
@@ -147,8 +145,10 @@ bool ModulePlayer::CleanUp()
 	LOG("Unloading player");
 
 	App->textures->Unload(car);
-	App->textures->Unload(dustTex);
+	App->textures->Unload(dust);
 
+	car = nullptr;
+	dust = nullptr;
 	currentCar = nullptr;
 
 	playersDx = 0;
@@ -519,11 +519,11 @@ update_status ModulePlayer::Update()
 	//Draw out of road particles
 	bool out = false;
 	if (App->scene_stage->leftTireOut) {
-		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE) - 75, SCREEN_HEIGHT - 35, &(leftDust.GetCurrentFrame()));
+		App->renderer->Blit(dust, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE) - 75, SCREEN_HEIGHT - 35, &(leftDust.GetCurrentFrame()));
 		out = true;
 	}
 	if (App->scene_stage->rigthTireOut) {
-		App->renderer->Blit(dustTex, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 35, &(rightDust.GetCurrentFrame()));
+		App->renderer->Blit(dust, (SCREEN_WIDTH / 2) - (App->renderer->camera.x / SCREEN_SIZE), SCREEN_HEIGHT - 35, &(rightDust.GetCurrentFrame()));
 		out = true;
 	}
 	if (out) {

@@ -1,19 +1,19 @@
-#include "Font.h"
+#include "ModuleFont.h"
 #include "Application.h"
 #include "ModuleTextures.h"
 #include "Globals.h"
 
 #include <stdio.h>
 
-Font::Font()
+ModuleFont::ModuleFont()
 {
 }
 
-Font::~Font()
+ModuleFont::~ModuleFont()
 {
 }
 
-bool Font::Init(const string str, const string trad)
+bool ModuleFont::Init(const string str, const string trad)
 {
 	bool ret = true;
 
@@ -32,9 +32,9 @@ bool Font::Init(const string str, const string trad)
 		char c = traductionString.at(i);
 
 		rect = new SDL_Rect();
-		rect->x = fontWidth * i;
+		rect->x = int(fontWidth * i);
 		rect->y = 0;
-		rect->w = fontWidth;
+		rect->w = int(fontWidth);
 		rect->h = fontHeight;
 		traductionTable[c] = rect;
 	}
@@ -44,9 +44,18 @@ bool Font::Init(const string str, const string trad)
 	return ret;
 }
 
-void Font::End()
+void ModuleFont::End()
 {
 	App->textures->Unload(fontSurface);
 	fontSurface = nullptr;
+
+	traductionString.clear();
+
+	for (map<char, SDL_Rect*>::iterator it = traductionTable.begin(); it != traductionTable.end(); ++it) {
+		it->second = nullptr;
+		delete it->second;
+	}
+
+	traductionTable.clear();
 }
 

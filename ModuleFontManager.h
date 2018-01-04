@@ -5,24 +5,24 @@
 #include <list>
 #include <vector>
 
-class Font;
+class ModuleFont;
 
 using namespace::std;
 
-class FontManager {
+class ModuleFontManager {
 
 public:
-	FontManager();
-	~FontManager();
+	ModuleFontManager();
+	~ModuleFontManager();
 
 	bool Init();
-	const Font* Allocate(const string font, const string fileName, const string lineNumber);
+	const ModuleFont* Allocate(const string font, const string fileName, const string lineNumber);
 	const bool Release(const string font);
 	void End();
 
 	//Dictionary of fonts
 	list<string> fontNames;
-	list<Font*> fontPointers;
+	list<ModuleFont*> fontPointers;
 
 	//Register of fonts allocated
 	list<string> reservedFontName;

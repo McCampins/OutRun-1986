@@ -8,7 +8,7 @@
 
 #include "Module.h"
 #include "Globals.h"
-#include "Font.h"
+#include "ModuleFont.h"
 
 #include <string>
 
@@ -29,7 +29,7 @@ public:
 	bool CleanUp();
 
 	bool Blit(SDL_Texture* texture, int x, int y, SDL_Rect* section, float curveSpeed = 1.0f, float scale = 1.0f);
-	bool Print(const Font* font, const int x, const int y, const string text);
+	bool Print(const ModuleFont* font, const int x, const int y, const string text);
 	bool DrawRect(const SDL_Rect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool use_camera = true);
 	bool DrawQuad(int x1, int y1, int w1, int x2, int y2, int w2, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 	bool DrawHorizontalLine(int x, int y, int w, Uint8 r, Uint8 g, Uint8 b, Uint8 a);

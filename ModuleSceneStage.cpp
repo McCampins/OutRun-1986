@@ -5,8 +5,8 @@
 #include <algorithm>
 
 #include "Globals.h"
-#include "FontManager.h"
-#include "Font.h"
+#include "ModuleFontManager.h"
+#include "ModuleFont.h"
 #include "Application.h"
 #include "ModuleTextures.h"
 #include "ModuleAudio.h"
@@ -35,10 +35,12 @@ ModuleSceneStage::~ModuleSceneStage()
 {
 }
 
+/* All ms counters to know and improve performance have been commented
 double clockToMilliseconds(clock_t ticks) {
 	// units/(units/time) => time (seconds) * 1000 = milliseconds
 	return (ticks / (double)CLOCKS_PER_SEC)*1000.0;
 }
+*/
 
 // Load assets
 bool ModuleSceneStage::Start()
@@ -47,12 +49,10 @@ bool ModuleSceneStage::Start()
 
 	background = App->textures->Load("rtype/background.png");
 	time = App->textures->Load("rtype/time.png");
-	score = App->textures->Load("rtype/score.png");
-	lap = App->textures->Load("rtype/lap.png");
 
 	startRace = "rtype/Music/startingRace.wav";
 
-	fm = new FontManager();
+	fm = new ModuleFontManager();
 
 	fm->Init();
 	greenFont = fm->Allocate("greenfont.bmp", __FILE__, to_string(__LINE__));
@@ -346,7 +346,7 @@ bool ModuleSceneStage::Start()
 	startTimer = clock(); //Start timer
 	App->audio->PlayFx(semaphoreFx);
 
-	msLog.open("log.txt");
+	//msLog.open("log.txt");
 
 	return true;
 }
@@ -376,12 +376,14 @@ bool ModuleSceneStage::CleanUp()
 
 	App->textures->Unload(background);
 	App->textures->Unload(time);
-	App->textures->Unload(score);
-	App->textures->Unload(lap);
+
+	background = nullptr;
 
 	App->player->Disable();
 
 	currentSegment = 0;
+	curveCameraMove = 0;
+	semaphoreFx = 0;
 	currentLane = 0;
 	previousYTopRoad = 0;
 	gameState = GameState::STARTING;
@@ -402,8 +404,10 @@ bool ModuleSceneStage::CleanUp()
 	fm->End();
 	fm = nullptr;
 	greenFont = nullptr;
+	pinkFont = nullptr;
+	redFont = nullptr;
 
-	msLog.close();
+	//msLog.close();
 	return true;
 }
 
@@ -414,8 +418,8 @@ update_status ModuleSceneStage::Update()
 {
 	secondsPassed = (clock() - startTimer) / CLOCKS_PER_SEC;
 
-	clock_t beginFrame = clock();
-	int typeOfRoad = 0;
+	//clock_t beginFrame = clock();
+	//int typeOfRoad = 0;
 
 	//Background
 	int diff = (previousYTopRoad - 520);
@@ -452,9 +456,9 @@ update_status ModuleSceneStage::Update()
 	std::vector<int> screenYPerWorldPosition;
 	std::vector<float> screenXPerWorldPosition;
 
-	clock_t endDraw = clock();
-	double msDrawRoad = 0;
-	double msChecks = 0;
+	//clock_t endDraw = clock();
+	//double msDrawRoad = 0;
+	//double msChecks = 0;
 	for (unsigned int i = 0; i < zMap.size(); i++) {
 		z = zMap.at(i);
 
@@ -477,11 +481,11 @@ update_status ModuleSceneStage::Update()
 
 		worldPosition = (z * 10) + App->player->position;
 
-		clock_t roadInit = clock();
+		//clock_t roadInit = clock();
 
 		//Check if uphill, downhill or no hill
 		if (dY < 0) {
-			typeOfRoad = -1;
+			//typeOfRoad = -1;
 
 			float percentage = 0.0f;
 			if (inTopSegment == true) {
@@ -502,7 +506,7 @@ update_status ModuleSceneStage::Update()
 			}
 		}
 		else if (dY > 0) {
-			typeOfRoad = 1;
+			//typeOfRoad = 1;
 
 			float percentage = 0.0f;
 			if (inTopSegment == true) {
@@ -523,11 +527,11 @@ update_status ModuleSceneStage::Update()
 			}
 		}
 		else {
-			typeOfRoad = 0;
+			//typeOfRoad = 0;
 			screenY = App->renderer->DrawRoads(screenY, worldPosition, scaleFactor, x, roadSeparation);
 		}
 
-		clock_t roadDraw = clock();
+		//clock_t roadDraw = clock();
 
 		//If the line we are drawing is the one the tires are placed, check if they are out of the road
 		if (screenY == (SCREEN_HEIGHT - 8) * SCREEN_SIZE) {
@@ -539,14 +543,14 @@ update_status ModuleSceneStage::Update()
 
 		clock_t endCheck = clock();
 
-		msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
-		msChecks += clockToMilliseconds(endCheck - roadDraw);
+		//msDrawRoad += clockToMilliseconds(roadDraw - roadInit);
+		//msChecks += clockToMilliseconds(endCheck - roadDraw);
 	}
 	//msLog << "ms: " << msDrawRoad << "---" << msChecks << endl;
 
 	previousYTopRoad = screenY;
 
-	clock_t endRoad = clock();
+	//clock_t endRoad = clock();
 
 	int height;
 	float width;
@@ -603,18 +607,18 @@ update_status ModuleSceneStage::Update()
 		}
 	}
 
-	clock_t endVisual = clock();
+	//clock_t endVisual = clock();
 
 	//UI
 	App->renderer->Blit(time, 10, 5, &timeR, 0.0f, 0.75f);
 
 	if (gameState != GameState::GAMEOVER && gameState != GameState::ENDING) {
 		double timeLeft = timeToFinish - secondsPassed;
-		if (timeLeft < 0) 
+		if (timeLeft < 0)
 			timeLeft = 0;
-		
-		if (timeLeft == 0) 
-			gameState = GameState::GAMEOVER;		
+
+		if (timeLeft == 0)
+			gameState = GameState::GAMEOVER;
 
 		timeRemaining = int(timeLeft);
 	}
@@ -668,14 +672,13 @@ update_status ModuleSceneStage::Update()
 				currentSegment++;
 			}
 			else {
-				if (gameState != GameState::GAMEOVER) {
+				if (gameState != GameState::GAMEOVER)
 					gameState = GameState::ENDING;
 
-					for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it)
-						delete *it;
+				for (std::vector<VisualElement*>::iterator it = vehicles.begin(); it != vehicles.end(); ++it)
+					delete *it;
 
-					vehicles.clear();
-				}
+				vehicles.clear();
 
 				topSegment = new Segment(0.0f, 0.0f, 0.0f, (float)zMap.size(), Inclination::CENTER);
 			}
@@ -739,14 +742,16 @@ update_status ModuleSceneStage::Update()
 		}
 		std::sort(vehicles.begin(), vehicles.end(), compareVisualElements);
 
-		clock_t endFrame = clock();
+		//clock_t endFrame = clock();
 
+		/* DEBUGGING 
 		double msTotalPassed = clockToMilliseconds(endFrame - beginFrame);
 		double msDraw = clockToMilliseconds(endDraw - beginFrame);
 		double msRoad = clockToMilliseconds(endRoad - endDraw);
 		double msVisual = clockToMilliseconds(endVisual - endRoad);
 		double msAdjustments = clockToMilliseconds(endFrame - endVisual);
 		msLog << "ms: " << msDraw << " + " << msRoad << " + " << msVisual << " + " << msAdjustments << " = " << msTotalPassed << " - " << typeOfRoad << " - " << endl;
+		*/
 	}
 
 	if (gameState == GameState::GAMEOVER) {
