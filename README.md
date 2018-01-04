@@ -22,15 +22,15 @@ Some logic and functions would obviously need to be added, but even though I kne
 
 In the music selection screen
 
-> A and D move between the three possible selections
+> **A** and **D** move between the three possible selections
 
 In the stage scene
 
-> W accelerates, S breaks, and A and D steer left and right, respectively.
+> **W** accelerates, **S** breaks, and **A** and **D** steer left and right, respectively.
 	
 ### Advance between scenes
 
-> The Space key advances between the first screens and once you lose or win, to go back to the initial screen without exiting the game.
+> The **Space** key advances between the first screens and once you lose or win, to go back to the initial screen without exiting the game.
 
 ---
 
