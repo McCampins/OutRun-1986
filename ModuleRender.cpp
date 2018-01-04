@@ -78,8 +78,7 @@ update_status ModuleRender::Update()
 
 	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 		camera.x -= curveSpeed;
-
-	*/
+	*/	
 
 	return UPDATE_CONTINUE;
 }

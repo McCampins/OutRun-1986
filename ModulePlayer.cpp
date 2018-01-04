@@ -482,6 +482,7 @@ update_status ModulePlayer::Update()
 		curveSpeed = playerSpeed * 10;
 		break;
 	case GameState::ENDING:
+	case GameState::BROKEN:
 		if (playerSpeed > 0.0f)
 			playerSpeed -= ACCELERATION;
 
@@ -500,6 +501,11 @@ update_status ModulePlayer::Update()
 			App->renderer->camera.x += 12;
 			if (App->renderer->camera.x > 0)
 				App->renderer->camera.x = 0;
+		}
+
+		if (App->scene_stage->gameState == GameState::BROKEN) {
+			if (App->renderer->camera.x == 0)
+				App->scene_stage->gameState = GameState::PLAYING;
 		}
 		break;
 	}
@@ -533,6 +539,11 @@ update_status ModulePlayer::Update()
 				playerSpeed = 0.0f;
 			}
 		}
+	}
+
+	//Check if the player is too far to a side and reposition him
+	if (App->renderer->camera.x > 2800 || App->renderer->camera.x < -3800) {
+		App->scene_stage->gameState = GameState::BROKEN;
 	}
 
 	return UPDATE_CONTINUE;

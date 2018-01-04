@@ -43,7 +43,8 @@ enum class GameState {
 	STARTING,
 	PLAYING,
 	GAMEOVER,
-	ENDING
+	ENDING,
+	BROKEN
 };
 
 struct Segment {

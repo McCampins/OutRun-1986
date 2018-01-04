@@ -611,7 +611,7 @@ update_status ModuleSceneStage::Update()
 	//UI
 	App->renderer->Blit(time, 10, 5, &timeR, 0.0f, 0.75f);
 
-	if (gameState != GameState::GAMEOVER && gameState != GameState::ENDING) {
+	if (gameState != GameState::GAMEOVER && gameState != GameState::ENDING && gameState != GameState::BROKEN) {
 		double timeLeft = timeToFinish - secondsPassed;
 		if (timeLeft < 0)
 			timeLeft = 0;
@@ -625,6 +625,11 @@ update_status ModuleSceneStage::Update()
 	double kmh;
 	std::string aux;
 	switch (gameState) {
+	case GameState::BROKEN:
+		App->renderer->Print(greenFont, 220, 20, to_string(timeRemaining));
+
+		App->renderer->Print(redFont, 750, 20, aux + "0 KMH");
+		break;
 	case GameState::STARTING:
 		if (secondsPassed >= timeToStart)
 		{
@@ -660,7 +665,7 @@ update_status ModuleSceneStage::Update()
 	}
 
 	//If still playing or on game over keep updating road and vehicles
-	if (gameState == GameState::PLAYING || gameState == GameState::GAMEOVER) {
+	if (gameState == GameState::PLAYING || gameState == GameState::GAMEOVER || gameState == GameState::BROKEN) {
 		//Update segments
 		App->renderer->camera.x += curveCameraMove;
 		topSegment->yMapPosition -= App->player->curveSpeed;

@@ -4,7 +4,7 @@
 #define ROADWIDTH 450
 #define RUMBLEWIDTH 50
 #define LINEWIDTH 24
-#define TERRAINWIDTH 6000
+#define TERRAINWIDTH 10000
 
 #include "Module.h"
 #include "Globals.h"
