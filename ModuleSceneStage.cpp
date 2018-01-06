@@ -71,7 +71,7 @@ bool ModuleSceneStage::Start()
 		float z = (float)ROADHEIGHTWORLD / (i - ((SCREEN_HEIGHT * SCREEN_SIZE) / 2));
 		zMap.push_back(z);
 		scaleFactor = (float)(y - minY) / (maxY - minY);
-		scaleFactor = (scaleFactor * 0.95f) + 0.05f;
+		scaleFactor = (scaleFactor * 0.98f) + 0.02f;
 		factorMap.push_back(scaleFactor);
 		y--;
 	}
@@ -343,7 +343,7 @@ bool ModuleSceneStage::Start()
 	semaphoreFx = App->audio->LoadFx(startRace);
 
 	startTimer = clock(); //Start timer
-	App->audio->PlayFx(semaphoreFx);
+	App->audio->PlayFx(semaphoreFx, 0);
 
 	//msLog.open("log.txt");
 
@@ -780,17 +780,17 @@ update_status ModuleSceneStage::Update()
 
 
 
-void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation)
+void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation) const
 {
 	SDL_Rect rect;
 	switch (vElem->position) {
 	case VisualElementPosition::LEFT:
 		if (vElem->overHorizon == true) {
 			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
-						App->renderer->Blit(vElem->texture, int((width + (vElem->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem->rect.h * scaleFactor) * 2) - vElem->y), &(vElem->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+						App->renderer->Blit(vElem->texture, int((width + (aux->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((aux->rect.h * scaleFactor) * 2) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
 					}
 				}
 			}
@@ -800,7 +800,7 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 		}
 		else {
 			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
 						App->renderer->Blit(aux->texture, int((width + (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
@@ -815,10 +815,10 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 	case VisualElementPosition::CENTER:
 		if (vElem->overHorizon == true) {
 			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
-						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->rect), scaleFactor, scaleFactor);
+						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
 					}
 				}
 			}
@@ -828,7 +828,12 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 		}
 		else {
 			if (vElem->anim.frames.size() > 0) {
-
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
 			}
 			else {
 				App->renderer->Blit(vElem->texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem->rect.h * scaleFactor) - vElem->y), &(vElem->rect), scaleFactor, scaleFactor);
@@ -838,7 +843,12 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 	case VisualElementPosition::RIGHT:
 		if (vElem->overHorizon == true) {
 			if (vElem->anim.frames.size() > 0) {
-
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int((width - (aux->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
 			}
 			else {
 				App->renderer->Blit(vElem->texture, int((width - (vElem->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem->rect.h * scaleFactor) - vElem->y), &(vElem->rect), scaleFactor, scaleFactor);
@@ -846,7 +856,12 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 		}
 		else {
 			if (vElem->anim.frames.size() > 0) {
-
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int((width - (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
 			}
 			else {
 				App->renderer->Blit(vElem->texture, int((width - (vElem->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem->rect.h * scaleFactor) - vElem->y), &(vElem->rect), scaleFactor, scaleFactor);
@@ -856,7 +871,7 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 	case VisualElementPosition::LEFTANDCENTER:
 		if (vElem->overHorizon == true) {
 			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
 						App->renderer->Blit(vElem->texture, int((width + (vElem->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem->rect.h * scaleFactor) * 2) - vElem->y), &(vElem->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
@@ -869,7 +884,7 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 		}
 		else {
 			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
 						App->renderer->Blit(aux->texture, int((width + (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
@@ -884,10 +899,10 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 		rect.x += rect.w;
 		if (vElem->overHorizon == true) {
 			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
-						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->rect), scaleFactor, scaleFactor);
+						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
 					}
 				}
 			}
@@ -897,7 +912,12 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 		}
 		else {
 			if (vElem->anim.frames.size() > 0) {
-
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
 			}
 			else {
 				App->renderer->Blit(vElem->texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem->rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
@@ -907,7 +927,7 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 	case VisualElementPosition::LEFTANDRIGHT:
 		if (vElem->overHorizon == true) {
 			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
 						App->renderer->Blit(vElem->texture, int((width + (vElem->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - ((vElem->rect.h * scaleFactor) * 2) - vElem->y), &(vElem->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
@@ -920,7 +940,7 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 		}
 		else {
 			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
 						App->renderer->Blit(aux->texture, int((width + (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
@@ -935,53 +955,93 @@ void ModuleSceneStage::DrawVisualElement(VisualElement* vElem, float width, int 
 		rect.x += rect.w;
 		if (vElem->overHorizon == true) {
 			if (vElem->anim.frames.size() > 0) {
-
-			}
-			else {
-				App->renderer->Blit(vElem->texture, int((width - (vElem->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem->rect.h * scaleFactor) - vElem->y), &(vElem->rect), scaleFactor, scaleFactor);
-			}
-		}
-		else {
-			if (vElem->anim.frames.size() > 0) {
-
-			}
-			else {
-				App->renderer->Blit(vElem->texture, int((width - (vElem->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem->rect.h * scaleFactor) - vElem->y), &(vElem->rect), scaleFactor, scaleFactor);
-			}
-		}
-		break;
-	case VisualElementPosition::CENTERANDRIGHT:
-		rect = vElem->rect;
-		rect.x += rect.w;
-		if (vElem->overHorizon == true) {
-			if (vElem->anim.frames.size() > 0) {
-				for (std::unordered_map<int, VisualElement*>::iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
 					VisualElement* aux = it->second;
 					if (vElem->CopyOf(it->second)) {
-						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->rect), scaleFactor, scaleFactor);
+						App->renderer->Blit(aux->texture, int((width - (aux->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
 					}
 				}
 			}
 			else {
-				App->renderer->Blit(vElem->texture, int(width / (SCREEN_SIZE * SCREEN_SIZE)), int(SCREEN_HEIGHT - (vElem->rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
+				App->renderer->Blit(vElem->texture, int((width - (vElem->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem->rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
 			}
 		}
 		else {
 			if (vElem->anim.frames.size() > 0) {
-
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int((width - (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
 			}
 			else {
-				App->renderer->Blit(vElem->texture, int((width + (roadSeparation * scaleFactor / 2)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem->rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
+				App->renderer->Blit(vElem->texture, int((width - (vElem->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem->rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
 			}
 		}
-		App->renderer->Blit(vElem->texture, int(-vElem->x + (SCREEN_WIDTH * scaleFactor / 2)), int(vElem->y * (2 - scaleFactor)), &(vElem->rect), 0.5f, scaleFactor);
+		break;
+	case VisualElementPosition::CENTERANDRIGHT:
+		if (vElem->overHorizon == true) {
+			if (vElem->anim.frames.size() > 0) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
+			}
+			else {
+				App->renderer->Blit(vElem->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem->rect.h * scaleFactor) - vElem->y), &(vElem->rect), scaleFactor, scaleFactor);
+			}
+		}
+		else {
+			if (vElem->anim.frames.size() > 0) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int(width / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
+			}
+			else {
+				App->renderer->Blit(vElem->texture, int(width / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem->rect.h * scaleFactor) - vElem->y), &(vElem->rect), scaleFactor, scaleFactor);
+			}
+		}
+		rect = vElem->rect;
+		rect.x += rect.w;
+		if (vElem->overHorizon == true) {
+			if (vElem->anim.frames.size() > 0) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int((width - (aux->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
+			}
+			else {
+				App->renderer->Blit(vElem->texture, int((width - (vElem->x * scaleFactor)) / SCREEN_SIZE), int(SCREEN_HEIGHT - (vElem->rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
+			}
+		}
+		else {
+			if (vElem->anim.frames.size() > 0) {
+				for (std::unordered_map<int, VisualElement*>::const_iterator it = staticVisualElements.begin(); it != staticVisualElements.end(); ++it) {
+					VisualElement* aux = it->second;
+					if (vElem->CopyOf(it->second)) {
+						App->renderer->Blit(aux->texture, int((width - (aux->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (aux->rect.h * scaleFactor) - aux->y), &(aux->anim.GetCurrentFrame()), scaleFactor, scaleFactor);
+					}
+				}
+			}
+			else {
+				App->renderer->Blit(vElem->texture, int((width - (vElem->x * scaleFactor)) / SCREEN_SIZE), int((height / SCREEN_SIZE) - (vElem->rect.h * scaleFactor) - vElem->y), &(rect), scaleFactor, scaleFactor);
+			}
+		}
 		break;
 	case VisualElementPosition::ALL:
 		break;
 	}
 }
 
-void ModuleSceneStage::DrawVehicle(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation)
+void ModuleSceneStage::DrawVehicle(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation) const
 {
 	unsigned int vehicleLane = 0;
 	switch (vElem->x) {
@@ -1041,7 +1101,7 @@ void ModuleSceneStage::DrawVehicle(VisualElement* vElem, float width, int height
 	}
 }
 
-bool ModuleSceneStage::CheckLeftTire(float x, float scaleFactor, float roadSeparation)
+bool ModuleSceneStage::CheckLeftTire(float x, float scaleFactor, float roadSeparation) const
 {
 	bool ret = false;
 	float leftTire = x - (ROADWIDTH * scaleFactor * 3) - (RUMBLEWIDTH * scaleFactor / 2) - (LINEWIDTH * scaleFactor * 3.5f) + App->renderer->camera.x * scaleFactor;
@@ -1074,7 +1134,7 @@ bool ModuleSceneStage::CheckLeftTire(float x, float scaleFactor, float roadSepar
 	return ret;
 }
 
-bool ModuleSceneStage::CheckRightTire(float x, float scaleFactor, float roadSeparation)
+bool ModuleSceneStage::CheckRightTire(float x, float scaleFactor, float roadSeparation) const
 {
 	bool ret = false;
 	float rightTire = x - (ROADWIDTH * scaleFactor * 3) - (RUMBLEWIDTH * scaleFactor / 2) - (LINEWIDTH * scaleFactor * 3.5f) + App->renderer->camera.x * scaleFactor;
@@ -1107,7 +1167,7 @@ bool ModuleSceneStage::CheckRightTire(float x, float scaleFactor, float roadSepa
 	return ret;
 }
 
-unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadSeparation)
+unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadSeparation) const
 {
 	int carX = (App->player->carX * SCREEN_SIZE) + App->renderer->camera.x + 95;
 	float drawX = x + App->renderer->camera.x * scaleFactor;
@@ -1118,8 +1178,11 @@ unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadS
 	else if (carX < ((drawX + (App->renderer->thirdRoadX * scaleFactor)) - (ROADWIDTH / 2))) {
 		return 2;
 	}
-	else if (carX < ((drawX + ((App->renderer->fourthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
+	else if (carX < ((drawX + ((App->renderer->fourthRoadX) * scaleFactor)) - (ROADWIDTH / 2))) {
 		return 3;
+	}
+	else if (carX < ((drawX + ((App->renderer->fourthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
+		return 0; //inside the separation
 	}
 	else if (carX < ((drawX + ((App->renderer->fifthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
 		return 4;

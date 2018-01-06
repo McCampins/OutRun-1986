@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ModuleTextures.h"
 #include "ModuleInput.h"
+#include "ModuleAudio.h"
 #include "ModuleRender.h"
 #include "ModuleFadeToBlack.h"
 #include "ModulePlayer.h"
@@ -136,6 +137,9 @@ bool ModulePlayer::Start()
 	car = App->textures->Load("rtype/ferrari.png");
 	dust = App->textures->Load("rtype/dust.png");
 
+	surpassCarFX = App->audio->LoadFx("rtype/Music/adelantar.wav");
+	crashFX = App->audio->LoadFx("rtype/Music/crash.wav");
+
 	return true;
 }
 
@@ -161,7 +165,7 @@ bool ModulePlayer::CleanUp()
 	return true;
 }
 
-bool ModulePlayer::keyPressed(int direction, int keysPressed)
+bool ModulePlayer::keyPressed(int direction, int keysPressed) const
 {
 	switch (direction) {
 		//LEFT
@@ -456,7 +460,12 @@ update_status ModulePlayer::Update()
 						if (vehicleLane == App->scene_stage->currentLane) {
 							playerSpeed = 0;
 							collision = true;
+							App->audio->PlayFx(crashFX);
 							break;
+						}
+						else {
+							if (abs(int(vehicleLane - App->scene_stage->currentLane) < 2))
+								App->audio->PlayFx(surpassCarFX);
 						}
 					}
 					idx++;

@@ -110,12 +110,12 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	void DrawVisualElement(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation);
-	void DrawVehicle(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation);
+	void DrawVisualElement(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation) const;
+	void DrawVehicle(VisualElement* vElem, float width, int height, float scaleFactor, float roadSeparation) const;
 
-	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation);
-	bool CheckRightTire(float x, float scaleFactor, float roadSeparation);
-	unsigned int CheckLane(float x, float scaleFactor, float roadSeparation);
+	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation) const;
+	bool CheckRightTire(float x, float scaleFactor, float roadSeparation) const;
+	unsigned int CheckLane(float x, float scaleFactor, float roadSeparation) const;
 
 public:
 	//textures

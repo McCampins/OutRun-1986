@@ -154,3 +154,16 @@ bool ModuleAudio::PlayFx(unsigned int id, int repeat)
 
 	return ret;
 }
+
+bool ModuleAudio::StopFx(unsigned int id)
+{
+	bool ret = false;
+
+	if (id < fx.size())
+	{
+		Mix_HaltChannel(id);
+		ret = true;
+	}
+
+	return ret;
+}

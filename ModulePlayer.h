@@ -19,7 +19,7 @@ public:
 	update_status Update();
 	bool CleanUp();
 
-	bool keyPressed(int direction, int keysPressed);
+	bool keyPressed(int direction, int keysPressed) const;
 
 public:
 	SDL_Texture* car = nullptr;
@@ -64,6 +64,9 @@ public:
 
 	unsigned int currentLane = 0;
 	int carX = 0;
+
+	unsigned int surpassCarFX = 0;
+	unsigned int crashFX = 0;
 };
 
 #endif

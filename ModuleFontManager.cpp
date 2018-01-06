@@ -29,7 +29,7 @@ vector<string> getFilenames(experimental::filesystem::path path) {
 	return filenames;
 }
 
-string replaceBackslashes(string s)
+string replaceBackslashes(string s) 
 {
 	size_t found = s.find("\\");
 	while (found != string::npos)
