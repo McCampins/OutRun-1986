@@ -24,7 +24,7 @@ public:
 	const char* passingBreeze = nullptr;
 	const char* magicalSound = nullptr;
 	unsigned int currentScreen;
-	bool mute = false;
+	bool mute;
 };
 
 #endif // __MODULESCENEMUSIC_H__

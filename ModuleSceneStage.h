@@ -115,7 +115,7 @@ public:
 
 	bool CheckLeftTire(float x, float scaleFactor, float roadSeparation) const;
 	bool CheckRightTire(float x, float scaleFactor, float roadSeparation) const;
-	unsigned int CheckLane(float x, float scaleFactor, float roadSeparation) const;
+	int CheckLane(float x, float scaleFactor, float roadSeparation) const;
 
 public:
 	//textures
@@ -145,7 +145,7 @@ public:
 	//Performance log
 	ofstream msLog;
 	//car player info
-	unsigned int currentLane = 0;
+	int currentLane = 0;
 	//game info
 	GameState gameState = GameState::STARTING;
 	int timeToFinish = 55;

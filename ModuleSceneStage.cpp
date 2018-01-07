@@ -536,7 +536,7 @@ update_status ModuleSceneStage::Update()
 		if (screenY == (SCREEN_HEIGHT - 8) * SCREEN_SIZE) {
 			leftTireOut = CheckLeftTire(x, scaleFactor, roadSeparation);
 			rigthTireOut = CheckRightTire(x, scaleFactor, roadSeparation);
-			currentLane = CheckLane(x, scaleFactor, roadSeparation);
+ 			currentLane = CheckLane(x, scaleFactor, roadSeparation);
 		}
 		screenYPerWorldPosition.push_back(screenY);
 
@@ -748,7 +748,7 @@ update_status ModuleSceneStage::Update()
 
 		//clock_t endFrame = clock();
 
-		/* DEBUGGING 
+		/* DEBUGGING
 		double msTotalPassed = clockToMilliseconds(endFrame - beginFrame);
 		double msDraw = clockToMilliseconds(endDraw - beginFrame);
 		double msRoad = clockToMilliseconds(endRoad - endDraw);
@@ -1167,12 +1167,15 @@ bool ModuleSceneStage::CheckRightTire(float x, float scaleFactor, float roadSepa
 	return ret;
 }
 
-unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadSeparation) const
+int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadSeparation) const
 {
 	int carX = (App->player->carX * SCREEN_SIZE) + App->renderer->camera.x + 95;
 	float drawX = x + App->renderer->camera.x * scaleFactor;
 
-	if (carX < ((drawX + (App->renderer->secondRoadX * scaleFactor)) - (ROADWIDTH / 2))) {
+	if (carX < ((drawX + (App->renderer->firstRoadX * scaleFactor)) - 50) - (ROADWIDTH / 2)) {
+		return -1;
+	}
+	else if (carX < ((drawX + (App->renderer->secondRoadX * scaleFactor)) - (ROADWIDTH / 2))) {
 		return 1;
 	}
 	else if (carX < ((drawX + (App->renderer->thirdRoadX * scaleFactor)) - (ROADWIDTH / 2))) {
@@ -1182,7 +1185,7 @@ unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadS
 		return 3;
 	}
 	else if (carX < ((drawX + ((App->renderer->fourthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
-		return 0; //inside the separation
+		return -1; //inside the separation
 	}
 	else if (carX < ((drawX + ((App->renderer->fifthRoadX + roadSeparation) * scaleFactor)) - (ROADWIDTH / 2))) {
 		return 4;
@@ -1190,8 +1193,12 @@ unsigned int ModuleSceneStage::CheckLane(float x, float scaleFactor, float roadS
 	else if (carX < ((drawX + ((App->renderer->sixthRoadX + roadSeparation)  * scaleFactor)) - (ROADWIDTH / 2))) {
 		return 5;
 	}
-	else {
+	else if (carX < ((drawX + 50 + ((App->renderer->sixthRoadX + roadSeparation) * scaleFactor)) + (ROADWIDTH / 2))) {
 		return 6;
 	}
+	else {
+		return -1;
+	}
+
 }
 

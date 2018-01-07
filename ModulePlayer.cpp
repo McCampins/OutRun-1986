@@ -428,7 +428,7 @@ update_status ModulePlayer::Update()
 				}
 			}
 
-			//Check if colision
+			//Check if colision with vehicles
 			bool collision = false;
 			unsigned int vehicleLane = 0;
 			unsigned int size = App->scene_stage->vehicles.size();
@@ -518,6 +518,100 @@ update_status ModulePlayer::Update()
 					}
 				}
 			}
+
+			/*
+			//Check collision with world objects
+			int currentLane = App->scene_stage->currentLane;
+			if (currentLane < 0) {
+				float carPosition = 6.0f + position;
+				VisualElement* vElem = nullptr;
+				int key;
+				bool collision = false;
+				for (std::unordered_multimap<int, VisualElement*>::iterator it = App->scene_stage->staticVisualElements.begin(); it != App->scene_stage->staticVisualElements.end() && collision == false; ++it) {
+					key = it->first;
+					auto range = App->scene_stage->staticVisualElements.equal_range(key);
+
+					for (auto it = range.first; it != range.second; ++it) {
+						vElem = it->second;
+
+						if (int(vElem->world * 10) < int(carPosition * 10)) {
+							switch (vElem->position) {
+							case VisualElementPosition::LEFT:
+								if (currentLane == -1 && vElem->x < -1550) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								break;
+							case VisualElementPosition::CENTER:
+								if (currentLane == -2) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								break;
+							case VisualElementPosition::RIGHT:
+								if (currentLane == -3 && vElem->x < -1550) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								break;
+							case VisualElementPosition::LEFTANDCENTER:
+								if (currentLane == -1 && vElem->x < -1550) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								if (currentLane == -2) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								break;
+							case VisualElementPosition::LEFTANDRIGHT:
+								if (currentLane == -1 && vElem->x < -1550) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								if (currentLane == -3 && vElem->x < -1550) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								break;
+							case VisualElementPosition::CENTERANDRIGHT:
+								if (currentLane == -2) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								if (currentLane == -3 && vElem->x < -1550) {
+									playerSpeed = 0;
+									App->scene_stage->gameState = GameState::BROKEN;
+									App->audio->PlayFx(crashFX);
+									collision = true;
+								}
+								break;
+							case VisualElementPosition::ALL:
+								break;
+							}
+						}
+
+					}
+				}
+
+			}
+			*/
 		}
 
 		position += playerSpeed;

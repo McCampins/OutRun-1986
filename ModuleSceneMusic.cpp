@@ -34,6 +34,8 @@ bool ModuleSceneMusic::Start()
 
 	currentScreen = 1;
 
+	mute = false;
+
 	return true;
 }
 
