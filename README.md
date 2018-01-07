@@ -61,7 +61,7 @@ Additionally, the game difficulty is relatively high, as with only one stage onc
 
 > Project webpage: https://McCampins.github.io/OutRun-1986/
 
-> Latest release: 
+> Latest release: https://github.com/McCampins/OutRun-1986/releases/tag/v1.0
 
 > Author: Marc Campins Coll
 
