@@ -4,7 +4,7 @@
 
 ## Game Info 
 
-Tribute to the 1986 old school arcade game OutRun done in the last three months. The first stage has been replicated with the help of the SDL libraries. The code has been coded in C++ and follows a simple modular structure. 
+Tribute to the 1986 old school arcade game OutRun. The first stage has been replicated with the help of the SDL libraries. The code has been coded in C++ and follows a simple modular structure. 
 
 Even though only the first stage has been reproduced, the code is prepared to introduce further stages. All the code necessary to introduce new visual elements or different roads is already implemented, as well as the classic Outrun intersection of the roads between stages. 
 
